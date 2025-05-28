@@ -54,7 +54,7 @@ for autor, texto in st.session_state.history:
         st.markdown(texto)
 
 def avanzar_paso(opcion, clave=None):
-    if opcion:
+    if opcion and opcion != "":
         add_message("user", opcion)
         if st.session_state.step == 0:
             if opcion == "Para mí":
@@ -64,12 +64,10 @@ def avanzar_paso(opcion, clave=None):
             else:
                 st.session_state.step = -1
         elif st.session_state.step == -1:
-            # Aquí opcion es el nombre del destinatario
             st.session_state.nombre = opcion
             st.session_state.pregs = ajustar_para_regalo(preguntas_base, opcion)
             st.session_state.step = 1
         else:
-            # Guardar respuesta
             clave_preg = st.session_state.pregs[st.session_state.step -1]["clave"]
             st.session_state.respuestas[clave_preg] = opcion
             st.session_state.step += 1
@@ -77,8 +75,9 @@ def avanzar_paso(opcion, clave=None):
 
 if st.session_state.step == 0:
     st.markdown("**Bot:** ¿La fragancia es para ti o para regalar?")
-    opcion = st.radio("Selecciona:", ["Para mí", "Para regalar"], key="opt0", index=0 if st.session_state.selected_option is None else ["Para mí", "Para regalar"].index(st.session_state.selected_option))
-    if opcion != st.session_state.selected_option:
+    opciones0 = ["Para mí", "Para regalar"]
+    opcion = st.radio("Selecciona:", opciones0, key="opt0", index=-1 if st.session_state.selected_option is None else opciones0.index(st.session_state.selected_option))
+    if opcion != st.session_state.selected_option and opcion != "":
         st.session_state.selected_option = opcion
         avanzar_paso(opcion)
 
@@ -93,8 +92,9 @@ elif 1 <= st.session_state.step <= len(st.session_state.pregs):
     idx = st.session_state.step - 1
     preg = st.session_state.pregs[idx]
     st.markdown(f"**Bot:** {preg['texto']}")
-    opcion = st.radio("", preg["opciones"], key=f"opt{idx}", index=0 if st.session_state.selected_option is None else preg["opciones"].index(st.session_state.selected_option))
-    if opcion != st.session_state.selected_option:
+    opciones_preg = preg["opciones"]
+    opcion = st.radio("", opciones_preg, key=f"opt{idx}", index=-1 if st.session_state.selected_option is None else opciones_preg.index(st.session_state.selected_option))
+    if opcion != st.session_state.selected_option and opcion != "":
         st.session_state.selected_option = opcion
         avanzar_paso(opcion)
 
@@ -123,4 +123,6 @@ else:
     for autor, texto in st.session_state.history[-6:]:
         with st.chat_message(autor):
             st.markdown(texto)
+
+
 
