@@ -1,62 +1,119 @@
 import streamlit as st
+import pandas as pd
+import random
 
-# Función para agregar mensajes a la conversación en sesión
-def add_message(sender, text):
-    if "messages" not in st.session_state:
-        st.session_state.messages = []
-    st.session_state.messages.append({"sender": sender, "text": text})
+st.set_page_config(page_title="Chatbot Coppel", layout="centered")
 
-# Inicializar variables de sesión
+preguntas_base = [
+    {"clave": "ambiente", "texto": "¿Cuál es tu ambiente favorito?", "opciones": ["Bosque", "Playa", "Ciudad"]},
+    {"clave": "estilo", "texto": "¿Qué estilo te define mejor?", "opciones": ["Elegante", "Deportivo", "Romántico"]},
+    {"clave": "actividad", "texto": "¿Qué actividad disfrutas más?", "opciones": ["Salir de noche", "Viajar", "Leer un libro"]},
+    {"clave": "clima", "texto": "¿Qué clima prefieres?", "opciones": ["Cálido", "Frío", "Templado"]},
+    {"clave": "intensidad", "texto": "¿Qué intensidad de aroma prefieres?", "opciones": ["Suave", "Moderado", "Intenso"]},
+    {"clave": "momento", "texto": "¿Para qué momento la usarías?", "opciones": ["Día", "Noche", "Ambos"]},
+]
+
+def ajustar_para_regalo(pregs, nombre):
+    preg_regalo = []
+    for p in pregs:
+        p_nueva = p.copy()
+        p_nueva["texto"] = p_nueva["texto"].replace("tu", f"de {nombre}").replace("Te", f"{nombre}").replace("¿Qué", "¿Cuál")
+        preg_regalo.append(p_nueva)
+    return preg_regalo
+
+def add_message(autor, texto):
+    if "history" not in st.session_state:
+        st.session_state.history = []
+    st.session_state.history.append((autor, texto))
+
+# Función para avanzar al siguiente paso cuando el usuario selecciona una opción
+def avanzar():
+    clave = st.session_state.current_preg_clave
+    valor = st.session_state.current_preg_valor
+    st.session_state.respuestas[clave] = valor
+    add_message("user", valor)
+    st.session_state.step += 1
+
+# Inicialización
+if "history" not in st.session_state:
+    st.session_state.history = []
 if "step" not in st.session_state:
     st.session_state.step = 0
-if "messages" not in st.session_state:
-    st.session_state.messages = []
+if "respuestas" not in st.session_state:
+    st.session_state.respuestas = {}
+if "pregs" not in st.session_state:
+    st.session_state.pregs = []
+if "nombre" not in st.session_state:
+    st.session_state.nombre = "ti"
+if "catalogo" not in st.session_state:
+    st.session_state.catalogo = None
 
-should_rerun = False  # Flag para controlar rerun
+st.title("💬 Chatbot Coppel")
 
-# Paso 0: pregunta inicial
+uploaded = st.sidebar.file_uploader("Sube el catálogo (Excel .xlsx)", type=["xlsx"])
+if uploaded:
+    st.session_state.catalogo = pd.read_excel(uploaded)
+
+# Mostrar historial chat
+for autor, texto in st.session_state.history:
+    with st.chat_message(autor):
+        st.markdown(texto)
+
 if st.session_state.step == 0:
-    opcion = st.radio("¿La fragancia es para ti o para regalar?", ["Para mí", "Para regalar"])
-    if st.button("Enviar", key="btn_0"):
+    st.markdown("**Bot:** ¿La fragancia es para ti o para regalar?")
+    opcion = st.radio("Selecciona:", ["Para mí", "Para regalar"], key="opt0")
+
+    if opcion:
         add_message("user", opcion)
-        st.session_state.para_regalo = opcion
-        if opcion == "Para regalar":
-            st.session_state.step = 0.5
-        else:
+        if opcion == "Para mí":
+            st.session_state.nombre = "ti"
+            st.session_state.pregs = preguntas_base
             st.session_state.step = 1
-            st.session_state.sexo = None
-        should_rerun = True
+        else:
+            st.session_state.step = -1
 
-# Paso 0.5: si es para regalar, pedir nombre
-elif st.session_state.step == 0.5:
-    nombre = st.text_input("Nombre del destinatario")
-    if st.button("Enviar", key="btn_0_5"):
-        add_message("user", nombre)
-        st.session_state.nombre = nombre
+elif st.session_state.step == -1:
+    st.markdown("**Bot:** ¿Cómo se llama la persona a la que vas a regalar la fragancia?")
+    nombre = st.text_input("Nombre del destinatario", key="nombre")
+    if nombre:
+        add_message("user", nombre.strip())
+        st.session_state.nombre = nombre.strip()
+        st.session_state.pregs = ajustar_para_regalo(preguntas_base, nombre.strip())
         st.session_state.step = 1
-        st.session_state.sexo = None
-        should_rerun = True
 
-# Paso 1: pregunta de sexo
-elif st.session_state.step == 1:
-    sexo = st.radio("Sexo (para recomendar fragancias adecuadas):", ["M", "F"])
-    if st.button("Enviar", key="btn_1"):
-        add_message("user", sexo)
-        st.session_state.sexo = sexo
-        st.session_state.step = 2
-        should_rerun = True
+elif 1 <= st.session_state.step <= len(st.session_state.pregs):
+    idx = st.session_state.step - 1
+    preg = st.session_state.pregs[idx]
+    st.markdown(f"**Bot:** {preg['texto']}")
+    st.session_state.current_preg_clave = preg["clave"]
+    st.radio("", preg["opciones"], key="current_preg_valor", on_change=avanzar)
 
-# Aquí continuar con los siguientes pasos de la encuesta...
+else:
+    nombre = st.session_state.nombre
+    r = st.session_state.respuestas
+    sujeto = "eres" if nombre == "ti" else f"{nombre} es"
+    descripcion = (f"¡Gracias! Según tus respuestas, {sujeto} alguien que disfruta del ambiente **{r['ambiente'].lower()}**, "
+                   f"con un estilo **{r['estilo'].lower()}**, y prefiere fragancias de intensidad **{r['intensidad'].lower()}**. "
+                   f"Ideal para momentos de **{r['actividad'].lower()}**.")
+    add_message("bot", descripcion)
 
-# Finalmente, si flag para rerun está activo, hacemos rerun
-if should_rerun:
-    st.experimental_rerun()
-
-# Mostrar conversación
-for msg in st.session_state.messages:
-    if msg["sender"] == "user":
-        st.markdown(f"**Tú:** {msg['text']}")
+    if st.session_state.catalogo is not None:
+        rec = st.session_state.catalogo.sample(1).iloc[0]
+        prod = rec["C_producto"]
+        po = rec["C_precio_original"]
+        pd = rec["C_precio_descuento"]
+        ahorro = po - pd
+        texto_rec = (f"Te recomendamos **{prod}**\n\n"
+                     f"- Precio original: ${po:.2f}\n"
+                     f"- Precio con descuento: ${pd:.2f} (ahorras ${ahorro:.2f})")
+        add_message("bot", texto_rec)
     else:
-        st.markdown(f"**Bot:** {msg['text']}")
+        add_message("bot", "Por favor sube el catálogo en la barra lateral para recomendarte.")
+
+    # Mostrar últimos mensajes para que se vean bien
+    for autor, texto in st.session_state.history[-4:]:
+        with st.chat_message(autor):
+            st.markdown(texto)
+
 
 
