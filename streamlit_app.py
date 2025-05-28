@@ -26,7 +26,6 @@ def add_message(autor, texto):
         st.session_state.history = []
     st.session_state.history.append((autor, texto))
 
-# Inicialización
 if "history" not in st.session_state:
     st.session_state.history = []
 if "step" not in st.session_state:
@@ -46,7 +45,6 @@ uploaded = st.sidebar.file_uploader("Sube el catálogo (Excel .xlsx)", type=["xl
 if uploaded:
     st.session_state.catalogo = pd.read_excel(uploaded)
 
-# Mostrar historial chat
 for autor, texto in st.session_state.history:
     with st.chat_message(autor):
         st.markdown(texto)
@@ -54,9 +52,14 @@ for autor, texto in st.session_state.history:
 if st.session_state.step == 0:
     st.markdown("**Bot:** ¿La fragancia es para ti o para regalar?")
     opcion = st.radio("Selecciona:", ["Para mí", "Para regalar"], key="opt0")
+
+    # Guardar respuesta inmediatamente al cambiar la opción
+    if opcion != st.session_state.respuestas.get("tipo", None):
+        st.session_state.respuestas["tipo"] = opcion
+
     if st.button("Enviar", key="btn0"):
-        add_message("user", opcion)
-        if opcion == "Para mí":
+        add_message("user", st.session_state.respuestas["tipo"])
+        if st.session_state.respuestas["tipo"] == "Para mí":
             st.session_state.nombre = "ti"
             st.session_state.pregs = preguntas_base
             st.session_state.step = 1
@@ -66,20 +69,28 @@ if st.session_state.step == 0:
 elif st.session_state.step == -1:
     st.markdown("**Bot:** ¿Cómo se llama la persona a la que vas a regalar la fragancia?")
     nombre = st.text_input("Nombre del destinatario", key="nombre")
-    if st.button("Enviar", key="btn_name") and nombre.strip():
-        add_message("user", nombre.strip())
+
+    if nombre != st.session_state.nombre and nombre.strip():
         st.session_state.nombre = nombre.strip()
-        st.session_state.pregs = ajustar_para_regalo(preguntas_base, nombre.strip())
+
+    if st.button("Enviar", key="btn_name") and st.session_state.nombre != "ti":
+        add_message("user", st.session_state.nombre)
+        st.session_state.pregs = ajustar_para_regalo(preguntas_base, st.session_state.nombre)
         st.session_state.step = 1
 
 elif 1 <= st.session_state.step <= len(st.session_state.pregs):
     idx = st.session_state.step - 1
     preg = st.session_state.pregs[idx]
     st.markdown(f"**Bot:** {preg['texto']}")
+
     opcion = st.radio("", preg["opciones"], key=f"opt{idx}")
-    if st.button("Enviar", key=f"btn{idx}"):
-        add_message("user", opcion)
+
+    # Guardar respuesta al cambiar opción
+    if opcion != st.session_state.respuestas.get(preg["clave"], None):
         st.session_state.respuestas[preg["clave"]] = opcion
+
+    if st.button("Enviar", key=f"btn{idx}"):
+        add_message("user", st.session_state.respuestas[preg["clave"]])
         st.session_state.step += 1
 
 else:
@@ -104,10 +115,10 @@ else:
     else:
         add_message("bot", "Por favor sube el catálogo en la barra lateral para recomendarte.")
 
-    # Mostrar últimos mensajes (evitar repetir todo el historial)
     for autor, texto in st.session_state.history[-4:]:
         with st.chat_message(autor):
             st.markdown(texto)
+
 
 
 
