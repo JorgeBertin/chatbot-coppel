@@ -2,23 +2,31 @@ import streamlit as st
 import pandas as pd
 import random
 
-st.set_page_config(page_title="Chatbot de Fragancias")
+st.set_page_config(page_title="Chatbot Coppel", layout="centered")
 
+# --- Inicializar estados ---
+if "step" not in st.session_state:
+    st.session_state.step = 0
+if "nombre" not in st.session_state:
+    st.session_state.nombre = ""
+if "respuestas" not in st.session_state:
+    st.session_state.respuestas = {}
 if "history" not in st.session_state:
     st.session_state.history = []
-    st.session_state.step = 0
-    st.session_state.respuestas = {}
+if "catalogo" not in st.session_state:
+    st.session_state.catalogo = None
+if "pregs" not in st.session_state:
+    st.session_state.pregs = []
 
-def add_message(role, text):
-    st.session_state.history.append({"role": role, "text": text})
+# --- Cargar Excel desde la barra lateral ---
+with st.sidebar:
+    st.title("📦 Catálogo")
+    archivo = st.file_uploader("Sube el archivo Excel del catálogo", type=["xlsx"])
+    if archivo:
+        st.session_state.catalogo = pd.read_excel(archivo)
+        st.success("Catálogo cargado correctamente.")
 
-st.sidebar.title(" 📁 Carga tu catálogo")
-archivo = st.sidebar.file_uploader("Sube aquí tu catálogo (.xlsx)", type=["xlsx"])
-if archivo:
-    catalogo = pd.read_excel(archivo)
-else:
-    st.sidebar.warning("Sube un archivo Excel para empezar")
-
+# --- Preguntas base ---
 preguntas_base = [
     {"clave": "ambiente", "texto": "¿Cuál es tu ambiente favorito?", "opciones": ["Bosque", "Playa", "Ciudad"]},
     {"clave": "estilo", "texto": "¿Qué estilo te define mejor?", "opciones": ["Elegante", "Deportivo", "Romántico"]},
@@ -28,69 +36,27 @@ preguntas_base = [
     {"clave": "momento", "texto": "¿Para qué momento la usarías?", "opciones": ["Día", "Noche", "Ambos"]},
 ]
 
-def ajustar_preguntas(pregs, nombre):
-    out = []
-    for p in pregs:
-        p2 = p.copy()
-        p2["texto"] = p2["texto"].replace("tu", f"de {nombre}").replace("¿Qué", "¿Cuál")
-        out.append(p2)
-    return out
+def ajustar_preguntas_para_regalo(preguntas, nombre):
+    preguntas_regalo = []
+    for p in preguntas:
+        p_nueva = p.copy()
+        p_nueva["texto"] = p_nueva["texto"].replace("tu", f"de {nombre}").replace("Te", f"{nombre}").replace("¿Qué", "¿Cuál")
+        preguntas_regalo.append(p_nueva)
+    return preguntas_regalo
 
-st.title("🤖 Chatbot de Fragancias")
-for msg in st.session_state.history:
-    st.markdown(f"**{'Bot' if msg['role']=='bot' else 'Tú'}:** {msg['text']}")
+def add_message(autor, mensaje):
+    st.session_state.history.append((autor, mensaje))
 
-if archivo:
-    if st.session_state.step == 0:
-        add_message("bot", "¿La fragancia es para ti o para regalar?")
-        col1, col2 = st.columns(2)
-        if col1.button("Para mí"):
-            add_message("user", "Para mí")
-            st.session_state.nombre = "ti"
-            st.session_state.pregs = preguntas_base
-            st.session_state.step = 1
-        if col2.button("Para regalar"):
-            add_message("user", "Para regalar")
-            st.session_state.step = 0.5
-    elif st.session_state.step == 0.5:
-        nombre = st.text_input("¿Cómo se llama la persona?", key="nombre_input")
-        if nombre:
-            add_message("user", nombre)
-            st.session_state.nombre = nombre
-            st.session_state.pregs = ajustar_preguntas(preguntas_base, nombre)
-            st.session_state.step = 1
-    elif 1 <= st.session_state.step <= len(st.session_state.pregs):
-        idx = int(st.session_state.step) - 1
-        p = st.session_state.pregs[idx]
-        add_message("bot", p["texto"])
-        sel = st.radio("", p["opciones"], key=f"q{idx}")
-        if st.button("Seleccionar", key=f"b{idx}"):
-            add_message("user", sel)
-            st.session_state.respuestas[p["clave"]] = sel
-            st.session_state.step += 1
-    else:
-        amb = st.session_state.respuestas["ambiente"].lower()
-        est = st.session_state.respuestas["estilo"].lower()
-        act = st.session_state.respuestas["actividad"].lower()
-        inten = st.session_state.respuestas["intensidad"].lower()
-        nombre = st.session_state.nombre
-        sujeto = "eres" if nombre == "ti" else f"{nombre} es"
-        desc = (f"¡Gracias! Según tus respuestas, {sujeto} alguien que disfruta del ambiente {amb}, "
-                f"con un estilo {est}, y prefiere fragancias de intensidad {inten}. "
-                f"Ideal para momentos de {act}.")
-        add_message("bot", desc)
+# --- Mostrar conversación tipo chat ---
+st.title("💬 Chatbot Coppel")
 
-        rec = catalogo.sample(1).iloc[0]
-        prod = rec["C_producto"]
-        pre_orig = rec["C_precio_original"]
-        pre_desc = rec["C_precio_descuento"]
-        ahorro = pre_orig - pre_desc
-        resultado = (f"Te recomiendo **{prod}**\n\n"
-                     f"- Precio original: ${pre_orig:.2f}\n"
-                     f"- Precio en línea: ${pre_desc:.2f} (ahorras ${ahorro:.2f})")
-        add_message("bot", resultado)
+for autor, mensaje in st.session_state.history:
+    with st.chat_message(autor):
+        st.markdown(mensaje)
 
-        if st.button("🔄 Empezar de nuevo"):
-            st.session_state.history = []
-            st.session_state.step = 0
-            st.session_state.respuestas = {}
+# --- Paso 0: ¿Es para ti o para regalo? ---
+if st.session_state.step == 0:
+    with st.chat_message("bot"):
+        st.markdown("¿La fragancia es para ti o para regalar?")
+    opcion = st.radio("Selecciona una opción:", ["Para mí", "Para rega]()
+
