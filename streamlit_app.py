@@ -51,8 +51,6 @@ for autor, texto in st.session_state.history:
     with st.chat_message(autor):
         st.markdown(texto)
 
-# Control de pasos sin rerun innecesario
-
 if st.session_state.step == 0:
     st.markdown("**Bot:** ¿La fragancia es para ti o para regalar?")
     opcion = st.radio("Selecciona:", ["Para mí", "Para regalar"], key="opt0")
@@ -64,7 +62,6 @@ if st.session_state.step == 0:
             st.session_state.step = 1
         else:
             st.session_state.step = -1
-        st.experimental_rerun()
 
 elif st.session_state.step == -1:
     st.markdown("**Bot:** ¿Cómo se llama la persona a la que vas a regalar la fragancia?")
@@ -74,7 +71,6 @@ elif st.session_state.step == -1:
         st.session_state.nombre = nombre.strip()
         st.session_state.pregs = ajustar_para_regalo(preguntas_base, nombre.strip())
         st.session_state.step = 1
-        st.experimental_rerun()
 
 elif 1 <= st.session_state.step <= len(st.session_state.pregs):
     idx = st.session_state.step - 1
@@ -85,7 +81,6 @@ elif 1 <= st.session_state.step <= len(st.session_state.pregs):
         add_message("user", opcion)
         st.session_state.respuestas[preg["clave"]] = opcion
         st.session_state.step += 1
-        st.experimental_rerun()
 
 else:
     nombre = st.session_state.nombre
@@ -109,14 +104,7 @@ else:
     else:
         add_message("bot", "Por favor sube el catálogo en la barra lateral para recomendarte.")
 
-    # Mostrar mensajes finales
-    for autor, texto in st.session_state.history[-2:]:  # Mostrar solo los últimos dos mensajes (descripción + recomendación)
+    # Mostrar últimos mensajes (evitar repetir todo el historial)
+    for autor, texto in st.session_state.history[-4:]:
         with st.chat_message(autor):
             st.markdown(texto)
-
-
-
-
-
-
-
