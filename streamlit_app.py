@@ -39,8 +39,6 @@ if "nombre" not in st.session_state:
     st.session_state.nombre = "ti"
 if "catalogo" not in st.session_state:
     st.session_state.catalogo = None
-if "selected_option" not in st.session_state:
-    st.session_state.selected_option = None
 
 st.title("💬 Chatbot Coppel")
 
@@ -53,50 +51,36 @@ for autor, texto in st.session_state.history:
     with st.chat_message(autor):
         st.markdown(texto)
 
-def avanzar_paso(opcion, clave=None):
-    if opcion and opcion != "":
-        add_message("user", opcion)
-        if st.session_state.step == 0:
-            if opcion == "Para mí":
-                st.session_state.nombre = "ti"
-                st.session_state.pregs = preguntas_base
-                st.session_state.step = 1
-            else:
-                st.session_state.step = -1
-        elif st.session_state.step == -1:
-            st.session_state.nombre = opcion
-            st.session_state.pregs = ajustar_para_regalo(preguntas_base, opcion)
-            st.session_state.step = 1
-        else:
-            clave_preg = st.session_state.pregs[st.session_state.step -1]["clave"]
-            st.session_state.respuestas[clave_preg] = opcion
-            st.session_state.step += 1
-        st.session_state.selected_option = None
-
 if st.session_state.step == 0:
     st.markdown("**Bot:** ¿La fragancia es para ti o para regalar?")
-    opciones0 = ["Para mí", "Para regalar"]
-    opcion = st.radio("Selecciona:", opciones0, key="opt0", index=-1 if st.session_state.selected_option is None else opciones0.index(st.session_state.selected_option))
-    if opcion != st.session_state.selected_option and opcion != "":
-        st.session_state.selected_option = opcion
-        avanzar_paso(opcion)
+    opcion = st.radio("Selecciona:", ["Para mí", "Para regalar"], key="opt0")
+    if st.button("Enviar", key="btn0"):
+        add_message("user", opcion)
+        if opcion == "Para mí":
+            st.session_state.nombre = "ti"
+            st.session_state.pregs = preguntas_base
+            st.session_state.step = 1
+        else:
+            st.session_state.step = -1
 
 elif st.session_state.step == -1:
     st.markdown("**Bot:** ¿Cómo se llama la persona a la que vas a regalar la fragancia?")
     nombre = st.text_input("Nombre del destinatario", key="nombre")
-    if nombre and nombre != st.session_state.selected_option:
-        st.session_state.selected_option = nombre
-        avanzar_paso(nombre)
+    if st.button("Enviar", key="btn_name") and nombre.strip():
+        add_message("user", nombre.strip())
+        st.session_state.nombre = nombre.strip()
+        st.session_state.pregs = ajustar_para_regalo(preguntas_base, nombre.strip())
+        st.session_state.step = 1
 
 elif 1 <= st.session_state.step <= len(st.session_state.pregs):
     idx = st.session_state.step - 1
     preg = st.session_state.pregs[idx]
     st.markdown(f"**Bot:** {preg['texto']}")
-    opciones_preg = preg["opciones"]
-    opcion = st.radio("", opciones_preg, key=f"opt{idx}", index=-1 if st.session_state.selected_option is None else opciones_preg.index(st.session_state.selected_option))
-    if opcion != st.session_state.selected_option and opcion != "":
-        st.session_state.selected_option = opcion
-        avanzar_paso(opcion)
+    opcion = st.radio("", preg["opciones"], key=f"opt{idx}")
+    if st.button("Enviar", key=f"btn{idx}"):
+        add_message("user", opcion)
+        st.session_state.respuestas[preg["clave"]] = opcion
+        st.session_state.step += 1
 
 else:
     nombre = st.session_state.nombre
@@ -120,9 +104,11 @@ else:
     else:
         add_message("bot", "Por favor sube el catálogo en la barra lateral para recomendarte.")
 
-    for autor, texto in st.session_state.history[-6:]:
+    # Mostrar últimos mensajes (evitar repetir todo el historial)
+    for autor, texto in st.session_state.history[-4:]:
         with st.chat_message(autor):
             st.markdown(texto)
+
 
 
 
