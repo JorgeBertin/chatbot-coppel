@@ -29,9 +29,11 @@ def add_message(autor, texto):
 def avanzar():
     clave = st.session_state.current_preg_clave
     valor = st.session_state.current_preg_valor
-    st.session_state.respuestas[clave] = valor
-    add_message("user", valor)
-    st.session_state.step += 1
+    # Solo avanzar si seleccionó algo (no None)
+    if valor is not None and valor != "":
+        st.session_state.respuestas[clave] = valor
+        add_message("user", valor)
+        st.session_state.step += 1
 
 if "history" not in st.session_state:
     st.session_state.history = []
@@ -84,7 +86,7 @@ elif 1 <= st.session_state.step <= len(st.session_state.pregs):
     st.markdown(f"**Bot:** {preg['texto']}")
     st.session_state.current_preg_clave = preg["clave"]
 
-    # Eliminar selección previa para que el radio no tenga opción seleccionada al cargar
+    # Eliminar selección previa para que radio venga sin opción marcada
     if "current_preg_valor" in st.session_state:
         del st.session_state["current_preg_valor"]
 
@@ -112,7 +114,9 @@ else:
     else:
         add_message("bot", "Por favor sube el catálogo en la barra lateral para recomendarte.")
 
+    # Mostrar últimos mensajes para que se vean bien
     for autor, texto in st.session_state.history[-4:]:
         with st.chat_message(autor):
             st.markdown(texto)
+
 
