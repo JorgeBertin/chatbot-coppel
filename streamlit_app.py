@@ -39,6 +39,8 @@ if "nombre" not in st.session_state:
     st.session_state.nombre = "ti"
 if "catalogo" not in st.session_state:
     st.session_state.catalogo = None
+if "sexo" not in st.session_state:
+    st.session_state.sexo = None
 
 # Inicializar flags de envío para botones de preguntas
 for i in range(len(st.session_state.pregs) if "pregs" in st.session_state else 0):
@@ -63,10 +65,23 @@ if st.session_state.step == 0:
         add_message("user", opcion)
         if opcion == "Para mí":
             st.session_state.nombre = "ti"
-            st.session_state.pregs = preguntas_base
-            st.session_state.step = 1
+            st.session_state.step = 0.5  # Paso intermedio para preguntar sexo
         else:
             st.session_state.step = -1
+
+elif st.session_state.step == 0.5:
+    st.markdown("**Bot:** ¿Cuál es tu sexo?")
+    sexo = st.radio("Selecciona:", ["Masculino", "Femenino", "Otro / Prefiero no decir"], key="sexo")
+    if st.button("Enviar", key="btn_sexo"):
+        add_message("user", sexo)
+        if sexo == "Masculino":
+            st.session_state.sexo = "M"
+        elif sexo == "Femenino":
+            st.session_state.sexo = "F"
+        else:
+            st.session_state.sexo = "U"  # Unisex u otro
+        st.session_state.pregs = preguntas_base
+        st.session_state.step = 1
 
 elif st.session_state.step == -1:
     st.markdown("**Bot:** ¿Cómo se llama la persona a la que vas a regalar la fragancia?")
@@ -99,20 +114,31 @@ else:
     add_message("bot", descripcion)
 
     if st.session_state.catalogo is not None:
-        rec = st.session_state.catalogo.sample(1).iloc[0]
+        sexo_user = st.session_state.sexo if st.session_state.sexo else "U"
+        # Filtrar catálogo por sexo (considera 'U' como unisex)
+        df_filtrado = st.session_state.catalogo[
+            st.session_state.catalogo["sexo"].isin([sexo_user, "U"])
+        ]
+        if df_filtrado.empty:
+            texto_rec = "No tenemos recomendaciones específicas para ese sexo. Aquí una recomendación general:"
+            rec = st.session_state.catalogo.sample(1).iloc[0]
+        else:
+            texto_rec = "Aquí tienes una recomendación acorde a tu preferencia:"
+            rec = df_filtrado.sample(1).iloc[0]
+
         prod = rec["C_producto"]
         po = rec["C_precio_original"]
         pd = rec["C_precio_descuento"]
         ahorro = po - pd
-        texto_rec = (f"Te recomendamos **{prod}**\n\n"
-                     f"- Precio original: ${po:.2f}\n"
-                     f"- Precio con descuento: ${pd:.2f} (ahorras ${ahorro:.2f})")
+        texto_rec += (f"\n\nTe recomendamos **{prod}**\n\n"
+                      f"- Precio original: ${po:.2f}\n"
+                      f"- Precio con descuento: ${pd:.2f} (ahorras ${ahorro:.2f})")
         add_message("bot", texto_rec)
     else:
         add_message("bot", "Por favor sube el catálogo en la barra lateral para recomendarte.")
 
-    # Mostrar últimos mensajes (evitar repetir todo el historial)
-    for autor, texto in st.session_state.history[-4:]:
+    # Mostrar últimos mensajes
+    for autor, texto in st.session_state.history[-6:]:
         with st.chat_message(autor):
             st.markdown(texto)
 
