@@ -40,6 +40,11 @@ if "nombre" not in st.session_state:
 if "catalogo" not in st.session_state:
     st.session_state.catalogo = None
 
+# Inicializar flags de envío para botones de preguntas
+for i in range(len(st.session_state.pregs) if "pregs" in st.session_state else 0):
+    if f"enviado_{i}" not in st.session_state:
+        st.session_state[f"enviado_{i}"] = False
+
 st.title("💬 Chatbot Coppel")
 
 uploaded = st.sidebar.file_uploader("Sube el catálogo (Excel .xlsx)", type=["xlsx"])
@@ -78,9 +83,11 @@ elif 1 <= st.session_state.step <= len(st.session_state.pregs):
     st.markdown(f"**Bot:** {preg['texto']}")
     opcion = st.radio("", preg["opciones"], key=f"opt{idx}")
     if st.button("Enviar", key=f"btn{idx}"):
-        add_message("user", opcion)
-        st.session_state.respuestas[preg["clave"]] = opcion
-        st.session_state.step += 1
+        if not st.session_state.get(f"enviado_{idx}", False):
+            st.session_state[f"enviado_{idx}"] = True
+            add_message("user", opcion)
+            st.session_state.respuestas[preg["clave"]] = opcion
+            st.session_state.step += 1
 
 else:
     nombre = st.session_state.nombre
@@ -108,3 +115,4 @@ else:
     for autor, texto in st.session_state.history[-4:]:
         with st.chat_message(autor):
             st.markdown(texto)
+
