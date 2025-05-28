@@ -26,7 +26,6 @@ def add_message(autor, texto):
         st.session_state.history = []
     st.session_state.history.append((autor, texto))
 
-# Función para avanzar al siguiente paso cuando el usuario selecciona una opción
 def avanzar():
     clave = st.session_state.current_preg_clave
     valor = st.session_state.current_preg_valor
@@ -34,7 +33,6 @@ def avanzar():
     add_message("user", valor)
     st.session_state.step += 1
 
-# Inicialización
 if "history" not in st.session_state:
     st.session_state.history = []
 if "step" not in st.session_state:
@@ -54,7 +52,6 @@ uploaded = st.sidebar.file_uploader("Sube el catálogo (Excel .xlsx)", type=["xl
 if uploaded:
     st.session_state.catalogo = pd.read_excel(uploaded)
 
-# Mostrar historial chat
 for autor, texto in st.session_state.history:
     with st.chat_message(autor):
         st.markdown(texto)
@@ -86,6 +83,11 @@ elif 1 <= st.session_state.step <= len(st.session_state.pregs):
     preg = st.session_state.pregs[idx]
     st.markdown(f"**Bot:** {preg['texto']}")
     st.session_state.current_preg_clave = preg["clave"]
+
+    # Eliminar selección previa para que el radio no tenga opción seleccionada al cargar
+    if "current_preg_valor" in st.session_state:
+        del st.session_state["current_preg_valor"]
+
     st.radio("", preg["opciones"], key="current_preg_valor", on_change=avanzar)
 
 else:
@@ -110,10 +112,7 @@ else:
     else:
         add_message("bot", "Por favor sube el catálogo en la barra lateral para recomendarte.")
 
-    # Mostrar últimos mensajes para que se vean bien
     for autor, texto in st.session_state.history[-4:]:
         with st.chat_message(autor):
             st.markdown(texto)
-
-
 
