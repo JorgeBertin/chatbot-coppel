@@ -29,11 +29,13 @@ def add_message(autor, texto):
 def avanzar():
     clave = st.session_state.current_preg_clave
     valor = st.session_state.current_preg_valor
-    # Solo avanzar si seleccionó algo (no None)
     if valor is not None and valor != "":
         st.session_state.respuestas[clave] = valor
         add_message("user", valor)
         st.session_state.step += 1
+        # Limpiar la selección para la siguiente pregunta
+        del st.session_state["current_preg_valor"]
+        st.experimental_rerun()
 
 if "history" not in st.session_state:
     st.session_state.history = []
@@ -61,7 +63,6 @@ for autor, texto in st.session_state.history:
 if st.session_state.step == 0:
     st.markdown("**Bot:** ¿La fragancia es para ti o para regalar?")
     opcion = st.radio("Selecciona:", ["Para mí", "Para regalar"], key="opt0")
-
     if opcion:
         add_message("user", opcion)
         if opcion == "Para mí":
@@ -70,6 +71,7 @@ if st.session_state.step == 0:
             st.session_state.step = 1
         else:
             st.session_state.step = -1
+        st.experimental_rerun()
 
 elif st.session_state.step == -1:
     st.markdown("**Bot:** ¿Cómo se llama la persona a la que vas a regalar la fragancia?")
@@ -79,6 +81,7 @@ elif st.session_state.step == -1:
         st.session_state.nombre = nombre.strip()
         st.session_state.pregs = ajustar_para_regalo(preguntas_base, nombre.strip())
         st.session_state.step = 1
+        st.experimental_rerun()
 
 elif 1 <= st.session_state.step <= len(st.session_state.pregs):
     idx = st.session_state.step - 1
@@ -86,19 +89,26 @@ elif 1 <= st.session_state.step <= len(st.session_state.pregs):
     st.markdown(f"**Bot:** {preg['texto']}")
     st.session_state.current_preg_clave = preg["clave"]
 
-    # Eliminar selección previa para que radio venga sin opción marcada
-    if "current_preg_valor" in st.session_state:
-        del st.session_state["current_preg_valor"]
+    # Asegurarse que no haya selección previa
+    if "current_preg_valor" not in st.session_state:
+        st.session_state["current_preg_valor"] = ""
 
-    st.radio("", preg["opciones"], key="current_preg_valor", on_change=avanzar)
+    st.radio(
+        "",
+        preg["opciones"],
+        key="current_preg_valor",
+        on_change=avanzar,
+    )
 
 else:
     nombre = st.session_state.nombre
     r = st.session_state.respuestas
     sujeto = "eres" if nombre == "ti" else f"{nombre} es"
-    descripcion = (f"¡Gracias! Según tus respuestas, {sujeto} alguien que disfruta del ambiente **{r['ambiente'].lower()}**, "
-                   f"con un estilo **{r['estilo'].lower()}**, y prefiere fragancias de intensidad **{r['intensidad'].lower()}**. "
-                   f"Ideal para momentos de **{r['actividad'].lower()}**.")
+    descripcion = (
+        f"¡Gracias! Según tus respuestas, {sujeto} alguien que disfruta del ambiente **{r['ambiente'].lower()}**, "
+        f"con un estilo **{r['estilo'].lower()}**, y prefiere fragancias de intensidad **{r['intensidad'].lower()}**. "
+        f"Ideal para momentos de **{r['actividad'].lower()}**."
+    )
     add_message("bot", descripcion)
 
     if st.session_state.catalogo is not None:
@@ -107,9 +117,11 @@ else:
         po = rec["C_precio_original"]
         pd = rec["C_precio_descuento"]
         ahorro = po - pd
-        texto_rec = (f"Te recomendamos **{prod}**\n\n"
-                     f"- Precio original: ${po:.2f}\n"
-                     f"- Precio con descuento: ${pd:.2f} (ahorras ${ahorro:.2f})")
+        texto_rec = (
+            f"Te recomendamos **{prod}**\n\n"
+            f"- Precio original: ${po:.2f}\n"
+            f"- Precio con descuento: ${pd:.2f} (ahorras ${ahorro:.2f})"
+        )
         add_message("bot", texto_rec)
     else:
         add_message("bot", "Por favor sube el catálogo en la barra lateral para recomendarte.")
@@ -118,5 +130,6 @@ else:
     for autor, texto in st.session_state.history[-4:]:
         with st.chat_message(autor):
             st.markdown(texto)
+
 
 
