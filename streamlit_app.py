@@ -33,9 +33,8 @@ def avanzar():
         st.session_state.respuestas[clave] = valor
         add_message("user", valor)
         st.session_state.step += 1
-        # Limpiar la selección para la siguiente pregunta
         del st.session_state["current_preg_valor"]
-        st.experimental_rerun()
+        st.session_state.should_rerun = True
 
 if "history" not in st.session_state:
     st.session_state.history = []
@@ -49,6 +48,8 @@ if "nombre" not in st.session_state:
     st.session_state.nombre = "ti"
 if "catalogo" not in st.session_state:
     st.session_state.catalogo = None
+if "should_rerun" not in st.session_state:
+    st.session_state.should_rerun = False
 
 st.title("💬 Chatbot Coppel")
 
@@ -89,7 +90,6 @@ elif 1 <= st.session_state.step <= len(st.session_state.pregs):
     st.markdown(f"**Bot:** {preg['texto']}")
     st.session_state.current_preg_clave = preg["clave"]
 
-    # Asegurarse que no haya selección previa
     if "current_preg_valor" not in st.session_state:
         st.session_state["current_preg_valor"] = ""
 
@@ -126,10 +126,14 @@ else:
     else:
         add_message("bot", "Por favor sube el catálogo en la barra lateral para recomendarte.")
 
-    # Mostrar últimos mensajes para que se vean bien
     for autor, texto in st.session_state.history[-4:]:
         with st.chat_message(autor):
             st.markdown(texto)
+
+if st.session_state.should_rerun:
+    st.session_state.should_rerun = False
+    st.experimental_rerun()
+
 
 
 
