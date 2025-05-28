@@ -4,7 +4,6 @@ import random
 
 st.set_page_config(page_title="Chatbot Coppel", layout="centered")
 
-# --- Preguntas base ---
 preguntas_base = [
     {"clave": "ambiente", "texto": "¿Cuál es tu ambiente favorito?", "opciones": ["Bosque", "Playa", "Ciudad"]},
     {"clave": "estilo", "texto": "¿Qué estilo te define mejor?", "opciones": ["Elegante", "Deportivo", "Romántico"]},
@@ -14,7 +13,6 @@ preguntas_base = [
     {"clave": "momento", "texto": "¿Para qué momento la usarías?", "opciones": ["Día", "Noche", "Ambos"]},
 ]
 
-# Función para ajustar preguntas si es regalo
 def ajustar_para_regalo(pregs, nombre):
     preg_regalo = []
     for p in pregs:
@@ -23,11 +21,12 @@ def ajustar_para_regalo(pregs, nombre):
         preg_regalo.append(p_nueva)
     return preg_regalo
 
-# Función para agregar mensaje al historial
 def add_message(autor, texto):
+    if "history" not in st.session_state:
+        st.session_state.history = []
     st.session_state.history.append((autor, texto))
 
-# Inicialización estado
+# Inicialización
 if "history" not in st.session_state:
     st.session_state.history = []
 if "step" not in st.session_state:
@@ -43,9 +42,8 @@ if "catalogo" not in st.session_state:
 
 st.title("💬 Chatbot Coppel")
 
-# Sidebar para cargar catálogo
 uploaded = st.sidebar.file_uploader("Sube el catálogo (Excel .xlsx)", type=["xlsx"])
-if uploaded is not None:
+if uploaded:
     st.session_state.catalogo = pd.read_excel(uploaded)
 
 # Mostrar historial chat
@@ -53,7 +51,8 @@ for autor, texto in st.session_state.history:
     with st.chat_message(autor):
         st.markdown(texto)
 
-# Paso 0: Pregunta inicial (para ti o regalar)
+# Control de pasos sin rerun innecesario
+
 if st.session_state.step == 0:
     st.markdown("**Bot:** ¿La fragancia es para ti o para regalar?")
     opcion = st.radio("Selecciona:", ["Para mí", "Para regalar"], key="opt0")
@@ -63,12 +62,10 @@ if st.session_state.step == 0:
             st.session_state.nombre = "ti"
             st.session_state.pregs = preguntas_base
             st.session_state.step = 1
-            st.experimental_rerun()
         else:
             st.session_state.step = -1
-            st.experimental_rerun()
+        st.experimental_rerun()
 
-# Paso -1: Pedir nombre si es regalo
 elif st.session_state.step == -1:
     st.markdown("**Bot:** ¿Cómo se llama la persona a la que vas a regalar la fragancia?")
     nombre = st.text_input("Nombre del destinatario", key="nombre")
@@ -79,11 +76,9 @@ elif st.session_state.step == -1:
         st.session_state.step = 1
         st.experimental_rerun()
 
-# Pasos 1..N: Preguntas de la encuesta
 elif 1 <= st.session_state.step <= len(st.session_state.pregs):
     idx = st.session_state.step - 1
     preg = st.session_state.pregs[idx]
-
     st.markdown(f"**Bot:** {preg['texto']}")
     opcion = st.radio("", preg["opciones"], key=f"opt{idx}")
     if st.button("Enviar", key=f"btn{idx}"):
@@ -92,7 +87,6 @@ elif 1 <= st.session_state.step <= len(st.session_state.pregs):
         st.session_state.step += 1
         st.experimental_rerun()
 
-# Paso final: Mostrar recomendación
 else:
     nombre = st.session_state.nombre
     r = st.session_state.respuestas
@@ -115,8 +109,11 @@ else:
     else:
         add_message("bot", "Por favor sube el catálogo en la barra lateral para recomendarte.")
 
-    st.session_state.step += 1
-    st.experimental_rerun()
+    # Mostrar mensajes finales
+    for autor, texto in st.session_state.history[-2:]:  # Mostrar solo los últimos dos mensajes (descripción + recomendación)
+        with st.chat_message(autor):
+            st.markdown(texto)
+
 
 
 
