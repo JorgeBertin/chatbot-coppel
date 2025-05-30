@@ -45,53 +45,48 @@ uploaded = st.sidebar.file_uploader("Sube el catálogo (Excel .xlsx)", type=["xl
 if uploaded:
     st.session_state.catalogo = pd.read_excel(uploaded)
 
+# Mostrar historial de mensajes (opcional, puedes ajustarlo)
 for autor, texto in st.session_state.history:
     with st.chat_message(autor):
         st.markdown(texto)
 
 if st.session_state.step == 0:
-    st.markdown("**Bot:** ¿La fragancia es para ti o para regalar?")
-    opcion = st.radio("Selecciona:", ["Para mí", "Para regalar"], key="opt0")
-
-    # Guardar respuesta inmediatamente al cambiar la opción
-    if opcion != st.session_state.respuestas.get("tipo", None):
-        st.session_state.respuestas["tipo"] = opcion
-
-    if st.button("Enviar", key="btn0"):
-        add_message("user", st.session_state.respuestas["tipo"])
-        if st.session_state.respuestas["tipo"] == "Para mí":
-            st.session_state.nombre = "ti"
-            st.session_state.pregs = preguntas_base
-            st.session_state.step = 1
-        else:
-            st.session_state.step = -1
+    with st.form("form_tipo"):
+        st.markdown("**Bot:** ¿La fragancia es para ti o para regalar?")
+        opcion = st.radio("Selecciona:", ["Para mí", "Para regalar"], key="opt0")
+        enviar = st.form_submit_button("Enviar")
+        if enviar:
+            add_message("user", opcion)
+            st.session_state.respuestas["tipo"] = opcion
+            if opcion == "Para mí":
+                st.session_state.nombre = "ti"
+                st.session_state.pregs = preguntas_base
+                st.session_state.step = 1
+            else:
+                st.session_state.step = -1
 
 elif st.session_state.step == -1:
-    st.markdown("**Bot:** ¿Cómo se llama la persona a la que vas a regalar la fragancia?")
-    nombre = st.text_input("Nombre del destinatario", key="nombre")
-
-    if nombre != st.session_state.nombre and nombre.strip():
-        st.session_state.nombre = nombre.strip()
-
-    if st.button("Enviar", key="btn_name") and st.session_state.nombre != "ti":
-        add_message("user", st.session_state.nombre)
-        st.session_state.pregs = ajustar_para_regalo(preguntas_base, st.session_state.nombre)
-        st.session_state.step = 1
+    with st.form("form_nombre"):
+        st.markdown("**Bot:** ¿Cómo se llama la persona a la que vas a regalar la fragancia?")
+        nombre = st.text_input("Nombre del destinatario", key="nombre")
+        enviar = st.form_submit_button("Enviar")
+        if enviar and nombre.strip():
+            st.session_state.nombre = nombre.strip()
+            add_message("user", st.session_state.nombre)
+            st.session_state.pregs = ajustar_para_regalo(preguntas_base, st.session_state.nombre)
+            st.session_state.step = 1
 
 elif 1 <= st.session_state.step <= len(st.session_state.pregs):
     idx = st.session_state.step - 1
     preg = st.session_state.pregs[idx]
-    st.markdown(f"**Bot:** {preg['texto']}")
-
-    opcion = st.radio("", preg["opciones"], key=f"opt{idx}")
-
-    # Guardar respuesta al cambiar opción
-    if opcion != st.session_state.respuestas.get(preg["clave"], None):
-        st.session_state.respuestas[preg["clave"]] = opcion
-
-    if st.button("Enviar", key=f"btn{idx}"):
-        add_message("user", st.session_state.respuestas[preg["clave"]])
-        st.session_state.step += 1
+    with st.form(f"form_{idx}"):
+        st.markdown(f"**Bot:** {preg['texto']}")
+        opcion = st.radio("", preg["opciones"], key=f"opt{idx}")
+        enviar = st.form_submit_button("Enviar")
+        if enviar:
+            st.session_state.respuestas[preg["clave"]] = opcion
+            add_message("user", opcion)
+            st.session_state.step += 1
 
 else:
     nombre = st.session_state.nombre
@@ -115,10 +110,10 @@ else:
     else:
         add_message("bot", "Por favor sube el catálogo en la barra lateral para recomendarte.")
 
-    for autor, texto in st.session_state.history[-4:]:
+    # Mostrar los últimos mensajes
+    for autor, texto in st.session_state.history[-6:]:
         with st.chat_message(autor):
             st.markdown(texto)
-
 
 
 
