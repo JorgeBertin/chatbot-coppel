@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import random
 
 st.set_page_config(page_title="Chatbot Coppel", layout="centered")
 
@@ -45,49 +44,46 @@ uploaded = st.sidebar.file_uploader("Sube el catálogo (Excel .xlsx)", type=["xl
 if uploaded:
     st.session_state.catalogo = pd.read_excel(uploaded)
 
-# Mostrar historial de mensajes (opcional, puedes ajustarlo)
+# Mostrar historial de mensajes
 for autor, texto in st.session_state.history:
     with st.chat_message(autor):
         st.markdown(texto)
 
+# PREGUNTA 0: ¿Para ti o para regalar?
 if st.session_state.step == 0:
-    with st.form("form_tipo"):
-        st.markdown("**Bot:** ¿La fragancia es para ti o para regalar?")
-        opcion = st.radio("Selecciona:", ["Para mí", "Para regalar"], key="opt0")
-        enviar = st.form_submit_button("Enviar")
-        if enviar:
-            add_message("user", opcion)
-            st.session_state.respuestas["tipo"] = opcion
-            if opcion == "Para mí":
-                st.session_state.nombre = "ti"
-                st.session_state.pregs = preguntas_base
-                st.session_state.step = 1
-            else:
-                st.session_state.step = -1
-
-elif st.session_state.step == -1:
-    with st.form("form_nombre"):
-        st.markdown("**Bot:** ¿Cómo se llama la persona a la que vas a regalar la fragancia?")
-        nombre = st.text_input("Nombre del destinatario", key="nombre")
-        enviar = st.form_submit_button("Enviar")
-        if enviar and nombre.strip():
-            st.session_state.nombre = nombre.strip()
-            add_message("user", st.session_state.nombre)
-            st.session_state.pregs = ajustar_para_regalo(preguntas_base, st.session_state.nombre)
+    opcion = st.radio("**Bot:** ¿La fragancia es para ti o para regalar?", ["Para mí", "Para regalar"], key="opt0")
+    if st.button("Enviar", key="btn0") and opcion:
+        add_message("user", opcion)
+        st.session_state.respuestas["tipo"] = opcion
+        if opcion == "Para mí":
+            st.session_state.nombre = "ti"
+            st.session_state.pregs = preguntas_base
             st.session_state.step = 1
+        else:
+            st.session_state.step = -1
 
+# PREGUNTA DE NOMBRE PARA REGALO
+elif st.session_state.step == -1:
+    nombre = st.text_input("**Bot:** ¿Cómo se llama la persona a la que vas a regalar la fragancia?", key="nombre")
+    if st.button("Enviar", key="btn_name") and nombre.strip():
+        st.session_state.nombre = nombre.strip()
+        add_message("user", st.session_state.nombre)
+        st.session_state.pregs = ajustar_para_regalo(preguntas_base, st.session_state.nombre)
+        st.session_state.step = 1
+
+# CICLO DE PREGUNTAS PERSONALIZADAS
 elif 1 <= st.session_state.step <= len(st.session_state.pregs):
     idx = st.session_state.step - 1
     preg = st.session_state.pregs[idx]
-    with st.form(f"form_{idx}"):
-        st.markdown(f"**Bot:** {preg['texto']}")
-        opcion = st.radio("", preg["opciones"], key=f"opt{idx}")
-        enviar = st.form_submit_button("Enviar")
-        if enviar:
-            st.session_state.respuestas[preg["clave"]] = opcion
-            add_message("user", opcion)
-            st.session_state.step += 1
+    opcion = st.radio(f"**Bot:** {preg['texto']}", preg["opciones"], key=f"opt{idx}")
 
+    # Aquí viene el truco: validamos que sí haya respuesta seleccionada antes de avanzar
+    if st.button("Enviar", key=f"btn{idx}") and opcion:
+        st.session_state.respuestas[preg["clave"]] = opcion
+        add_message("user", opcion)
+        st.session_state.step += 1
+
+# MENSAJE FINAL Y RECOMENDACIÓN
 else:
     nombre = st.session_state.nombre
     r = st.session_state.respuestas
@@ -95,7 +91,8 @@ else:
     descripcion = (f"¡Gracias! Según tus respuestas, {sujeto} alguien que disfruta del ambiente **{r['ambiente'].lower()}**, "
                    f"con un estilo **{r['estilo'].lower()}**, y prefiere fragancias de intensidad **{r['intensidad'].lower()}**. "
                    f"Ideal para momentos de **{r['actividad'].lower()}**.")
-    add_message("bot", descripcion)
+    if not st.session_state.history or st.session_state.history[-1][1] != descripcion:
+        add_message("bot", descripcion)
 
     if st.session_state.catalogo is not None:
         rec = st.session_state.catalogo.sample(1).iloc[0]
@@ -106,15 +103,13 @@ else:
         texto_rec = (f"Te recomendamos **{prod}**\n\n"
                      f"- Precio original: ${po:.2f}\n"
                      f"- Precio con descuento: ${pd:.2f} (ahorras ${ahorro:.2f})")
-        add_message("bot", texto_rec)
+        if not st.session_state.history or st.session_state.history[-1][1] != texto_rec:
+            add_message("bot", texto_rec)
     else:
-        add_message("bot", "Por favor sube el catálogo en la barra lateral para recomendarte.")
+        mensaje_catalogo = "Por favor sube el catálogo en la barra lateral para recomendarte."
+        if not st.session_state.history or st.session_state.history[-1][1] != mensaje_catalogo:
+            add_message("bot", mensaje_catalogo)
 
-    # Mostrar los últimos mensajes
     for autor, texto in st.session_state.history[-6:]:
         with st.chat_message(autor):
             st.markdown(texto)
-
-
-
-
