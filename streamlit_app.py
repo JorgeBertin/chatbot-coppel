@@ -1,62 +1,41 @@
-import streamlit as st
+import gradio as gr
 import pandas as pd
 import random
 
-st.set_page_config(page_title="Recomendador de Fragancias", layout="centered")
+df = pd.read_excel("catalogo_fragancias.xlsx")
 
-st.title("Recomendador de Fragancias - Coppel")
+def recomendar(sexo, ambiente, estilo, actividad, clima, intensidad, momento):
+    filtros = (
+        (df['Sexo'].str.lower() == sexo.lower()) |
+        (sexo == "Prefiero no decirlo")
+    ) & (df['Ambiente'] == ambiente) & (df['Estilo'] == estilo) & \
+        (df['Actividad'] == actividad) & (df['Clima'] == clima) & \
+        (df['Intensidad'] == intensidad) & (df['Momento'] == momento)
 
-# Subir archivo Excel
-archivo_excel = st.file_uploader("📂 Sube tu catálogo de fragancias (.xlsx)", type="xlsx")
+    resultados = df[filtros]
+    if len(resultados) >= 3:
+        seleccion = resultados.sample(3)
+    elif len(resultados) > 0:
+        seleccion = resultados.sample(len(resultados))
+    else:
+        seleccion = df.sample(3)
 
-if archivo_excel is not None:
-    # Cargar y limpiar los datos
-    df = pd.read_excel(archivo_excel)
-    df.columns = df.columns.str.strip()
-    
-    columnas_a_normalizar = ["Sexo", "Ambiente", "Estilo", "Actividad", "Clima", "Intensidad", "Momento"]
-    for col in columnas_a_normalizar:
-        df[col] = df[col].astype(str).str.strip().str.lower()
+    return "\n\n".join([f"{row['Nombre']} - {row['Precio']}" for _, row in seleccion.iterrows()])
 
-    # Preguntas al usuario
-    sexo = st.selectbox("¿Cuál es tu sexo?", ["Femenino", "Masculino", "Prefiero no decirlo"]).lower()
-    ambiente = st.selectbox("¿Cuál es tu ambiente favorito?", ["Bosque", "Playa", "Ciudad"]).lower()
-    estilo = st.selectbox("¿Qué estilo te define mejor?", ["Elegante", "Deportivo", "Romántico"]).lower()
-    actividad = st.selectbox("¿Qué actividad disfrutas más?", ["Salir de noche", "Viajar", "Leer un libro"]).lower()
-    clima = st.selectbox("¿Qué clima prefieres?", ["Cálido", "Frío", "Templado"]).lower()
-    intensidad = st.selectbox("¿Qué intensidad de aroma prefieres?", ["Suave", "Moderado", "Intenso"]).lower()
-    momento = st.selectbox("¿Para qué momento la usarías?", ["Día", "Noche", "Ambos"]).lower()
+iface = gr.Interface(
+    fn=recomendar,
+    inputs=[
+        gr.Dropdown(["Femenino", "Masculino", "Prefiero no decirlo"], label="Sexo"),
+        gr.Dropdown(["Bosque", "Playa", "Ciudad"], label="Ambiente"),
+        gr.Dropdown(["Elegante", "Deportivo", "Romántico"], label="Estilo"),
+        gr.Dropdown(["Salir de noche", "Viajar", "Leer un libro"], label="Actividad"),
+        gr.Dropdown(["Cálido", "Frío", "Templado"], label="Clima"),
+        gr.Dropdown(["Suave", "Moderado", "Intenso"], label="Intensidad"),
+        gr.Dropdown(["Día", "Noche", "Ambos"], label="Momento")
+    ],
+    outputs="text",
+    title="Recomendador de Fragancias"
+)
 
-    # Recomendaciones
-    if st.button("🔍 Recomendar fragancias"):
-        filtros = (
-            ((df['sexo'] == sexo) | (sexo == "prefiero no decirlo")) &
-            (df['ambiente'] == ambiente) &
-            (df['estilo'] == estilo) &
-            (df['actividad'] == actividad) &
-            (df['clima'] == clima) &
-            (df['intensidad'] == intensidad) &
-            (df['momento'] == momento)
-        )
+iface.launch()
 
-        resultados = df[filtros]
-
-        if len(resultados) >= 3:
-            seleccion = resultados.sample(3)
-        elif len(resultados) > 0:
-            seleccion = resultados.sample(len(resultados))
-        else:
-            seleccion = df.sample(3)
-            st.warning("😔 No se encontraron coincidencias exactas. Aquí tienes recomendaciones generales:")
-
-        for idx, row in seleccion.iterrows():
-            st.markdown(f"""
-            **{row['Nombre']}**
-            - Sexo: {row['Sexo']}
-            - Estilo: {row['Estilo']}
-            - Intensidad: {row['Intensidad']}
-            - Clima: {row['Clima']}
-            - Precio: ${row['Precio']}
-            """)
-else:
-    st.info("Por favor, sube un archivo Excel con tu catálogo para comenzar.")
