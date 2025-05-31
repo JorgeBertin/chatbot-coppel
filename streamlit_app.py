@@ -1,10 +1,9 @@
+import streamlit as st
 import pandas as pd
 import random
 
-# Carga catálogo de fragancias
-catalogo = pd.read_excel("catalogo coppel.xlsx")
+st.set_page_config(page_title="Chatbot Coppel", layout="centered")
 
-# Preguntas base
 preguntas_base = [
     {"clave": "ambiente", "texto": "¿Cuál es tu ambiente favorito?", "opciones": ["Bosque", "Playa", "Ciudad"]},
     {"clave": "estilo", "texto": "¿Qué estilo te define mejor?", "opciones": ["Elegante", "Deportivo", "Romántico"]},
@@ -14,57 +13,111 @@ preguntas_base = [
     {"clave": "momento", "texto": "¿Para qué momento la usarías?", "opciones": ["Día", "Noche", "Ambos"]},
 ]
 
-def ajustar_preguntas_para_regalo(preguntas, nombre):
-    preguntas_regalo = []
-    for p in preguntas:
+def ajustar_para_regalo(pregs, nombre):
+    preg_regalo = []
+    for p in pregs:
         p_nueva = p.copy()
         p_nueva["texto"] = p_nueva["texto"].replace("tu", f"de {nombre}").replace("Te", f"{nombre}").replace("¿Qué", "¿Cuál")
-        preguntas_regalo.append(p_nueva)
-    return preguntas_regalo
+        preg_regalo.append(p_nueva)
+    return preg_regalo
 
-def chatbot():
-    print("¿La fragancia es para ti o para regalar?")
-    opcion = input("1. Para mí\n2. Para regalar\nSelecciona (1 o 2): ").strip()
-    if opcion == "1":
-        nombre = "ti"
-        preguntas = preguntas_base
-    elif opcion == "2":
-        nombre = input("¿Cómo se llama la persona a la que vas a regalar la fragancia?: ").strip()
-        preguntas = ajustar_preguntas_para_regalo(preguntas_base, nombre)
+def add_message(autor, texto):
+    if "history" not in st.session_state:
+        st.session_state.history = []
+    st.session_state.history.append((autor, texto))
+
+if "history" not in st.session_state:
+    st.session_state.history = []
+if "step" not in st.session_state:
+    st.session_state.step = 0
+if "respuestas" not in st.session_state:
+    st.session_state.respuestas = {}
+if "pregs" not in st.session_state:
+    st.session_state.pregs = []
+if "nombre" not in st.session_state:
+    st.session_state.nombre = "ti"
+if "catalogo" not in st.session_state:
+    st.session_state.catalogo = None
+
+st.title("💬 Chatbot Coppel")
+
+uploaded = st.sidebar.file_uploader("Sube el catálogo (Excel .xlsx)", type=["xlsx"])
+if uploaded:
+    st.session_state.catalogo = pd.read_excel(uploaded)
+
+for autor, texto in st.session_state.history:
+    with st.chat_message(autor):
+        st.markdown(texto)
+
+if st.session_state.step == 0:
+    st.markdown("**Bot:** ¿La fragancia es para ti o para regalar?")
+    opcion = st.radio("Selecciona:", ["Para mí", "Para regalar"], key="opt0")
+
+    # Guardar respuesta inmediatamente al cambiar la opción
+    if opcion != st.session_state.respuestas.get("tipo", None):
+        st.session_state.respuestas["tipo"] = opcion
+
+    if st.button("Enviar", key="btn0"):
+        add_message("user", st.session_state.respuestas["tipo"])
+        if st.session_state.respuestas["tipo"] == "Para mí":
+            st.session_state.nombre = "ti"
+            st.session_state.pregs = preguntas_base
+            st.session_state.step = 1
+        else:
+            st.session_state.step = -1
+
+elif st.session_state.step == -1:
+    st.markdown("**Bot:** ¿Cómo se llama la persona a la que vas a regalar la fragancia?")
+    nombre = st.text_input("Nombre del destinatario", key="nombre")
+
+    if nombre != st.session_state.nombre and nombre.strip():
+        st.session_state.nombre = nombre.strip()
+
+    if st.button("Enviar", key="btn_name") and st.session_state.nombre != "ti":
+        add_message("user", st.session_state.nombre)
+        st.session_state.pregs = ajustar_para_regalo(preguntas_base, st.session_state.nombre)
+        st.session_state.step = 1
+
+elif 1 <= st.session_state.step <= len(st.session_state.pregs):
+    idx = st.session_state.step - 1
+    preg = st.session_state.pregs[idx]
+    st.markdown(f"**Bot:** {preg['texto']}")
+
+    opcion = st.radio("", preg["opciones"], key=f"opt{idx}")
+
+    # Guardar respuesta al cambiar opción
+    if opcion != st.session_state.respuestas.get(preg["clave"], None):
+        st.session_state.respuestas[preg["clave"]] = opcion
+
+    if st.button("Enviar", key=f"btn{idx}"):
+        add_message("user", st.session_state.respuestas[preg["clave"]])
+        st.session_state.step += 1
+
+else:
+    nombre = st.session_state.nombre
+    r = st.session_state.respuestas
+    sujeto = "eres" if nombre == "ti" else f"{nombre} es"
+    descripcion = (f"¡Gracias! Según tus respuestas, {sujeto} alguien que disfruta del ambiente **{r['ambiente'].lower()}**, "
+                   f"con un estilo **{r['estilo'].lower()}**, y prefiere fragancias de intensidad **{r['intensidad'].lower()}**. "
+                   f"Ideal para momentos de **{r['actividad'].lower()}**.")
+    add_message("bot", descripcion)
+
+    if st.session_state.catalogo is not None:
+        rec = st.session_state.catalogo.sample(1).iloc[0]
+        prod = rec["C_producto"]
+        po = rec["C_precio_original"]
+        pd = rec["C_precio_descuento"]
+        ahorro = po - pd
+        texto_rec = (f"Te recomendamos **{prod}**\n\n"
+                     f"- Precio original: ${po:.2f}\n"
+                     f"- Precio con descuento: ${pd:.2f} (ahorras ${ahorro:.2f})")
+        add_message("bot", texto_rec)
     else:
-        print("Opción no válida.")
-        return
-    
-    respuestas = {}
-    for p in preguntas:
-        print(f"\n{p['texto']}")
-        for idx, o in enumerate(p["opciones"], 1):
-            print(f"{idx}. {o}")
-        while True:
-            seleccion = input("Selecciona (1, 2 o 3): ").strip()
-            if seleccion in ["1", "2", "3"]:
-                break
-            print("Opción inválida, intenta de nuevo.")
-        respuestas[p["clave"]] = p["opciones"][int(seleccion)-1]
-    
-    # Descripción personalizada
-    descripcion = (f"\n¡Gracias! Según tus respuestas, {'eres' if opcion == '1' else f'{nombre} es'} alguien que disfruta del ambiente {respuestas['ambiente'].lower()}, "
-                   f"con un estilo {respuestas['estilo'].lower()}, y prefiere fragancias de intensidad {respuestas['intensidad'].lower()}. Ideal para momentos de {respuestas['actividad'].lower()}.")
-    print(descripcion)
-    
-    # Recomendación aleatoria
-    recomendacion = catalogo.sample(1).iloc[0]
-    producto = recomendacion["C_producto"]
-    precio_original = recomendacion["C_precio_original"]
-    precio_descuento = recomendacion["C_precio_descuento"]
-    descuento = precio_original - precio_descuento
-    
-    print(f"\nTe recomendamos la siguiente fragancia: {producto}")
-    print(f"Precio original: ${precio_original:.2f}")
-    print(f"Precio en línea: ${precio_descuento:.2f} (ahorras ${descuento:.2f})")
+        add_message("bot", "Por favor sube el catálogo en la barra lateral para recomendarte.")
 
-# Ejecutar el chatbot
-chatbot()
+    for autor, texto in st.session_state.history[-4:]:
+        with st.chat_message(autor):
+            st.markdown(texto)
 
 
 
