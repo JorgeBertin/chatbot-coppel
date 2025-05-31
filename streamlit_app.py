@@ -27,11 +27,11 @@ if st.button("🎯 Ver mis fragancias ideales"):
     resultados = df[
         (df['sexo'] == sexo.lower()) &
         (df['ambiente'] == ambiente.lower()) &
-        (df['Estilo'] == Estilo.lower()) &
-        (df['Actividad'] == Actividad.lower()) &
-        (df['Clima'] == Clima.lower()) &
-        (df['Intensidad'] == intensidad.lower()) &
-        (df['Momento'] == momento.lower())
+        (df['estilo'] == estilo.lower()) &
+        (df['actividad'] == actividad.lower()) &
+        (df['clima'] == clima.lower()) &
+        (df['intensidad'] == intensidad.lower()) &
+        (df['momento'] == momento.lower())
     ]
 
     if not resultados.empty:
