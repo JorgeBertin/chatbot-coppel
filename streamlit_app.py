@@ -7,7 +7,8 @@ st.title("💐 Test de fragancias")
 # Cargar archivo Excel
 @st.cache_data
 def cargar_datos():
-    df = pd.read_excel("fragancias_hombre_mujer.xlsx")
+    df = pd.read_excel("fragancias_recomendadas.xlsx")
+    df.columns = df.columns.str.strip().str.lower()  # normalizar nombres
     return df
 
 df = cargar_datos()
@@ -21,22 +22,21 @@ clima = st.selectbox("5. ¿Qué clima prefieres?", ["Cálido", "Frío", "Templad
 intensidad = st.selectbox("6. ¿Qué intensidad de aroma prefieres?", ["Suave", "Moderado", "Intenso"])
 momento = st.selectbox("7. ¿Para qué momento la usarías?", ["Día", "Noche", "Ambos"])
 
-# Botón
+# Botón para recomendar
 if st.button("🎯 Ver mis fragancias ideales"):
-    # Filtrar DataFrame según respuestas
     resultados = df[
-        (df['SEXO'].str.lower() == sexo.lower()) &
-        (df['Ambiente'].str.lower() == ambiente.lower()) &
-        (df['Estilo'].str.lower() == estilo.lower()) &
-        (df['Actividad'].str.lower() == actividad.lower()) &
-        (df['Clima'].str.lower() == clima.lower()) &
-        (df['Intensidad'].str.lower() == intensidad.lower()) &
-        (df['Momento'].str.lower() == momento.lower())
+        (df['sexo'] == sexo.lower()) &
+        (df['ambiente'] == ambiente.lower()) &
+        (df['estilo'] == estilo.lower()) &
+        (df['actividad'] == actividad.lower()) &
+        (df['clima'] == clima.lower()) &
+        (df['intensidad'] == intensidad.lower()) &
+        (df['momento'] == momento.lower())
     ]
 
     if not resultados.empty:
         st.success("🌟 Estas son tus fragancias recomendadas:")
         top3 = resultados.sample(n=min(3, len(resultados)), random_state=42)
-        st.table(top3[['Fragancia']])  # Cambia esto si quieres mostrar más columnas
+        st.table(top3[['fragancia', 'precio', 'precio final']])
     else:
-        st.warning("😔 No encontramos coincidencias exactas. Prueba con otras combinaciones o ajusta el archivo de datos.")
+        st.warning("😔 No encontramos coincidencias exactas. Prueba con otras combinaciones.")
