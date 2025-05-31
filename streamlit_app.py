@@ -22,8 +22,8 @@ intensidad = st.selectbox("6. ¿Qué intensidad de aroma prefieres?", ["Suave", 
 momento = st.selectbox("7. ¿Para qué momento la usarías?", ["Día", "Noche", "Ambos"])
 
 # Botón
-if st.button("🎯 Ver mi fragancia ideal"):
-    # Filtrar según respuestas
+if st.button("🎯 Ver mis fragancias ideales"):
+    # Filtrar DataFrame según respuestas
     resultados = df[
         (df['Sexo'].str.lower() == sexo.lower()) &
         (df['Ambiente'].str.lower() == ambiente.lower()) &
@@ -33,9 +33,10 @@ if st.button("🎯 Ver mi fragancia ideal"):
         (df['Intensidad'].str.lower() == intensidad.lower()) &
         (df['Momento'].str.lower() == momento.lower())
     ]
-    
+
     if not resultados.empty:
         st.success("🌟 Estas son tus fragancias recomendadas:")
-        st.table(resultados[['Fragancia']])  # o las columnas que quieras mostrar
+        top3 = resultados.sample(n=min(3, len(resultados)), random_state=42)
+        st.table(top3[['Fragancia']])  # Cambia esto si quieres mostrar más columnas
     else:
         st.warning("😔 No encontramos coincidencias exactas. Prueba con otras combinaciones o ajusta el archivo de datos.")
