@@ -7,7 +7,7 @@ st.title("💐 Test de fragancias")
 # Cargar archivo Excel
 @st.cache_data
 def cargar_datos():
-    df = pd.read_excel("fragancias_recomendadas.xlsx")
+    df = pd.read_excel("Fragancias_Coppel.xlsx")
     df.columns = df.columns.str.strip().str.lower()  # normalizar nombres
     return df
 
