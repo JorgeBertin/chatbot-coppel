@@ -25,13 +25,13 @@ momento = st.selectbox("7. ¿Para qué momento la usarías?", ["Día", "Noche", 
 # Botón para recomendar
 if st.button("🎯 Ver mis fragancias ideales"):
     resultados = df[
-        (df['sexo'] == sexo.lower()) &
-        (df['ambiente'] == ambiente.lower()) &
-        (df['estilo'] == estilo.lower()) &
-        (df['actividad'] == actividad.lower()) &
-        (df['clima'] == clima.lower()) &
-        (df['intensidad'] == intensidad.lower()) &
-        (df['momento'] == momento.lower())
+        (df['Sexo'] == sexo.lower()) &
+        (df['Ambiente'] == ambiente.lower()) &
+        (df['Estilo'] == estilo.lower()) &
+        (df['Actividad'] == actividad.lower()) &
+        (df['Clima'] == clima.lower()) &
+        (df['Intensidad'] == intensidad.lower()) &
+        (df['Momento'] == momento.lower())
     ]
 
     if not resultados.empty:
