@@ -14,7 +14,7 @@ def cargar_datos():
 df = cargar_datos()
 
 # Preguntas
-sexo = st.radio("1. ¿Cuál es tu sexo?", ["Masculino", "Femenino", "Prefiero no decirlo"])
+sexo = st.radio("1. ¿Cuál es tu sexo?", ["Hombre", "Mujer", "Prefiero no decirlo"])
 ambiente = st.selectbox("2. ¿Cuál es tu ambiente favorito?", ["Bosque", "Playa", "Ciudad"])
 estilo = st.selectbox("3. ¿Qué estilo te define mejor?", ["Elegante", "Deportivo", "Romántico"])
 actividad = st.selectbox("4. ¿Qué actividad disfrutas más?", ["Salir de noche", "Viajar", "Leer un libro"])
