@@ -62,9 +62,11 @@ for autor, texto in st.session_state.history:
         st.markdown(texto)
 
 if st.session_state.step == 0:
-    st.markdown("**Bot:** ¿La fragancia es para ti o para regalar?")
+    pregunta_inicial = "¿La fragancia es para ti o para regalar?"
+    st.markdown(f"**Bot:** {pregunta_inicial}")
     opcion = st.radio("Selecciona:", ["Para mí", "Para regalar"], key="opt0")
     if st.button("Enviar", key="btn0"):
+        add_message("bot", pregunta_inicial)
         add_message("user", opcion)
         if opcion == "Para mí":
             st.session_state.nombre = "ti"
@@ -74,9 +76,11 @@ if st.session_state.step == 0:
             st.session_state.step = -1
 
 elif st.session_state.step == -1:
-    st.markdown("**Bot:** ¿Cómo se llama la persona a la que vas a regalar la fragancia?")
+    pregunta_nombre = "¿Cómo se llama la persona a la que vas a regalar la fragancia?"
+    st.markdown(f"**Bot:** {pregunta_nombre}")
     nombre = st.text_input("Nombre del destinatario", key="nombre")
     if st.button("Enviar", key="btn_name") and nombre.strip():
+        add_message("bot", pregunta_nombre)
         add_message("user", nombre.strip())
         st.session_state.nombre = nombre.strip()
         st.session_state.pregs = ajustar_para_regalo(preguntas_base, nombre.strip())
@@ -88,6 +92,7 @@ elif 1 <= st.session_state.step <= len(st.session_state.pregs):
     st.markdown(f"**Bot:** {preg['texto']}")
     opcion = st.radio("", preg["opciones"], key=f"opt{idx}")
     if st.button("Enviar", key=f"btn{idx}"):
+        add_message("bot", preg["texto"])
         add_message("user", opcion)
         st.session_state.respuestas[preg["clave"]] = opcion
         st.session_state.step += 1
@@ -118,5 +123,6 @@ else:
     for autor, texto in st.session_state.history[-4:]:
         with st.chat_message(autor):
             st.markdown(texto)
+
 
 
