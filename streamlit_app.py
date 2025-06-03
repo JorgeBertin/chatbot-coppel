@@ -210,15 +210,19 @@ else:
                     f"Ideal para momentos de **{r.get('actividad','').lower()}**.")
         add_message("bot", descripcion)
 
-        sexo_usuario = st.session_state.respuestas.get("sexo", None)
-        if sexo_usuario == "Masculino":
+        # --- CORRECCIÓN DEL RESPALDO ---
+        sexo_usuario = st.session_state.respuestas.get("sexo", "").strip().lower()
+        if sexo_usuario == "masculino":
             catalogo = st.session_state.catalogo_hombres
             tipo = "hombres"
-        elif sexo_usuario == "Femenino":
+            respaldo = respaldo_hombres
+        elif sexo_usuario == "femenino":
             catalogo = st.session_state.catalogo_mujeres
             tipo = "mujeres"
+            respaldo = respaldo_mujeres
         else:
             catalogo = None
+            respaldo = []
             tipo = ""
 
         if catalogo is not None and len(catalogo) > 0:
@@ -237,8 +241,8 @@ else:
                 )
             texto_rec = "Te recomendamos las siguientes fragancias:\n\n" + "\n\n".join(recomendaciones)
             add_message("bot", texto_rec)
-        elif tipo == "hombres":
-            muestras = random.sample(respaldo_hombres, min(3, len(respaldo_hombres)))
+        elif respaldo and len(respaldo) > 0:
+            muestras = random.sample(respaldo, min(3, len(respaldo)))
             recomendaciones = []
             for rec in muestras:
                 prod = rec["C_producto"]
@@ -251,23 +255,10 @@ else:
                     f"    - Precio con descuento: ${pd:.2f}\n"
                     f"    - **Ahorras: ${ahorro:.2f}**"
                 )
-            texto_rec = "Te recomendamos las siguientes fragancias:\n\n" + "\n\n".join(recomendaciones)
-            add_message("bot", texto_rec)
-        elif tipo == "mujeres":
-            muestras = random.sample(respaldo_mujeres, min(3, len(respaldo_mujeres)))
-            recomendaciones = []
-            for rec in muestras:
-                prod = rec["C_producto"]
-                po = rec["C_precio_original"]
-                pd = rec["C_precio_descuento"]
-                ahorro = po - pd
-                recomendaciones.append(
-                    f"- **{prod}**\n"
-                    f"    - Precio original: ${po:.2f}\n"
-                    f"    - Precio con descuento: ${pd:.2f}\n"
-                    f"    - **Ahorras: ${ahorro:.2f}**"
-                )
-            texto_rec = "Te recomendamos las siguientes fragancias:\n\n" + "\n\n".join(recomendaciones)
+            texto_rec = (
+                "Te recomendamos las siguientes fragancias (usando catálogo de respaldo de Coppel):\n\n" +
+                "\n\n".join(recomendaciones)
+            )
             add_message("bot", texto_rec)
         else:
             add_message("bot", f"Por favor sube el catálogo de {tipo} en la barra lateral para recomendarte.")
