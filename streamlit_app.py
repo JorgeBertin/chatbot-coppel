@@ -22,7 +22,7 @@ st.markdown("""
         margin-left: 0 !important;
     }
     .block-container {
-        padding-top: 35px !important;
+        padding-top: 32px !important;
     }
     </style>
 """, unsafe_allow_html=True)
