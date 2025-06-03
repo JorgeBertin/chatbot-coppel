@@ -7,25 +7,22 @@ st.set_page_config(page_title="Chatbot Coppel", layout="centered")
 # --- CSS para compactar los mensajes de chat ---
 st.markdown("""
     <style>
-    /* Reduce padding y margen de las burbujas del chat */
-    .element-container:has(.stChatMessage) {
+    /* Solo compacta las burbujas que están debajo del header */
+    div[data-testid="stChatMessage"] {
+        padding: 8px 16px !important;
         margin-bottom: 2px !important;
-    }
-    .stChatMessage {
-        padding: 10px 18px !important;
-        margin-bottom: 0px !important;
-        min-height: 10px !important;
+        min-height: 8px !important;
     }
     .stChatMessageContent {
-        padding: 4px 0 !important;
+        padding: 3px 0 !important;
     }
     .stChatMessageIcon {
         margin-right: 6px !important;
         margin-left: 0 !important;
     }
-    /* Opcional: reduce el espacio abajo del header */
+    /* Opcional: espacio arriba y abajo de la cabecera */
     .block-container {
-        padding-top: 22px !important;
+        padding-top: 24px !important;
     }
     </style>
 """, unsafe_allow_html=True)
