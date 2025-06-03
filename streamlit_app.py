@@ -161,6 +161,8 @@ if "catalogo_hombres" not in st.session_state:
     st.session_state.catalogo_hombres = None
 if "catalogo_mujeres" not in st.session_state:
     st.session_state.catalogo_mujeres = None
+if "resultados_mostrados" not in st.session_state:
+    st.session_state.resultados_mostrados = False
 
 # Subir catálogos por sexo
 uploaded_hombres = st.sidebar.file_uploader("Sube el catálogo de HOMBRES (Excel .xlsx)", type=["xlsx"], key="hombres")
@@ -206,67 +208,70 @@ else:
         # Ya se mostró el mensaje de despedida, no hacer más.
         pass
     else:
-        sujeto = "eres" if nombre == "ti" else f"{nombre} es"
-        descripcion = (f"¡Gracias! Según tus respuestas, {sujeto} alguien que disfruta del ambiente **{r.get('ambiente','').lower()}**, "
-                    f"con un estilo **{r.get('estilo','').lower()}**, y prefiere fragancias de intensidad **{r.get('intensidad','').lower()}**. "
-                    f"Ideal para momentos de **{r.get('actividad','').lower()}**.")
-        add_message("bot", descripcion)
+        if not st.session_state.resultados_mostrados:
+            sujeto = "eres" if nombre == "ti" else f"{nombre} es"
+            descripcion = (f"¡Gracias! Según tus respuestas, {sujeto} alguien que disfruta del ambiente **{r.get('ambiente','').lower()}**, "
+                        f"con un estilo **{r.get('estilo','').lower()}**, y prefiere fragancias de intensidad **{r.get('intensidad','').lower()}**. "
+                        f"Ideal para momentos de **{r.get('actividad','').lower()}**.")
 
-        # --- CORRECCIÓN DEL RESPALDO ---
-        sexo_usuario = st.session_state.respuestas.get("sexo", "").strip().lower()
-        if sexo_usuario == "masculino":
-            catalogo = st.session_state.catalogo_hombres
-            tipo = "hombres"
-            respaldo = respaldo_hombres
-        elif sexo_usuario == "femenino":
-            catalogo = st.session_state.catalogo_mujeres
-            tipo = "mujeres"
-            respaldo = respaldo_mujeres
-        else:
-            catalogo = None
-            respaldo = []
-            tipo = ""
+            # --- CORRECCIÓN DEL RESPALDO ---
+            sexo_usuario = st.session_state.respuestas.get("sexo", "").strip().lower()
+            if sexo_usuario == "masculino":
+                catalogo = st.session_state.catalogo_hombres
+                tipo = "hombres"
+                respaldo = respaldo_hombres
+            elif sexo_usuario == "femenino":
+                catalogo = st.session_state.catalogo_mujeres
+                tipo = "mujeres"
+                respaldo = respaldo_mujeres
+            else:
+                catalogo = None
+                respaldo = []
+                tipo = ""
 
-        if catalogo is not None and len(catalogo) > 0:
-            muestras = catalogo.sample(min(3, len(catalogo)))
-            recomendaciones = []
-            for _, rec in muestras.iterrows():
-                prod = rec["C_producto"]
-                po = rec["C_precio_original"]
-                pd = rec["C_precio_descuento"]
-                ahorro = po - pd
-                recomendaciones.append(
-                    f"- **{prod}**\n"
-                    f"    - Precio original: ${po:.2f}\n"
-                    f"    - Precio con descuento: ${pd:.2f}\n"
-                    f"    - **Ahorras: ${ahorro:.2f}**"
+            if catalogo is not None and len(catalogo) > 0:
+                muestras = catalogo.sample(min(3, len(catalogo)))
+                recomendaciones = []
+                for _, rec in muestras.iterrows():
+                    prod = rec["C_producto"]
+                    po = rec["C_precio_original"]
+                    pd = rec["C_precio_descuento"]
+                    ahorro = po - pd
+                    recomendaciones.append(
+                        f"- **{prod}**\n"
+                        f"    - Precio original: ${po:.2f}\n"
+                        f"    - Precio con descuento: ${pd:.2f}\n"
+                        f"    - **Ahorras: ${ahorro:.2f}**"
+                    )
+                texto_rec = "Te recomendamos las siguientes fragancias:\n\n" + "\n\n".join(recomendaciones)
+                add_message("bot", descripcion)
+                add_message("bot", texto_rec)
+            elif respaldo and len(respaldo) > 0:
+                muestras = random.sample(respaldo, min(3, len(respaldo)))
+                recomendaciones = []
+                for rec in muestras:
+                    prod = rec["C_producto"]
+                    po = rec["C_precio_original"]
+                    pd = rec["C_precio_descuento"]
+                    ahorro = po - pd
+                    recomendaciones.append(
+                        f"- **{prod}**\n"
+                        f"    - Precio original: ${po:.2f}\n"
+                        f"    - Precio con descuento: ${pd:.2f}\n"
+                        f"    - **Ahorras: ${ahorro:.2f}**"
+                    )
+                texto_rec = (
+                    "Te recomendamos las siguientes fragancias (usando catálogo de respaldo de Coppel):\n\n" +
+                    "\n\n".join(recomendaciones)
                 )
-            texto_rec = "Te recomendamos las siguientes fragancias:\n\n" + "\n\n".join(recomendaciones)
-            add_message("bot", texto_rec)
-        elif respaldo and len(respaldo) > 0:
-            muestras = random.sample(respaldo, min(3, len(respaldo)))
-            recomendaciones = []
-            for rec in muestras:
-                prod = rec["C_producto"]
-                po = rec["C_precio_original"]
-                pd = rec["C_precio_descuento"]
-                ahorro = po - pd
-                recomendaciones.append(
-                    f"- **{prod}**\n"
-                    f"    - Precio original: ${po:.2f}\n"
-                    f"    - Precio con descuento: ${pd:.2f}\n"
-                    f"    - **Ahorras: ${ahorro:.2f}**"
-                )
-            texto_rec = (
-                "Te recomendamos las siguientes fragancias (usando catálogo de respaldo de Coppel):\n\n" +
-                "\n\n".join(recomendaciones)
-            )
-            add_message("bot", texto_rec)
-        else:
-            add_message("bot", f"Por favor sube el catálogo de {tipo} en la barra lateral para recomendarte.")
+                add_message("bot", descripcion)
+                add_message("bot", texto_rec)
+            else:
+                add_message("bot", f"Por favor sube el catálogo de {tipo} en la barra lateral para recomendarte.")
+            st.session_state.resultados_mostrados = True
 
-        # Mostrar últimos mensajes del historial
-        for autor, texto in st.session_state.history[-2:]:
+        # Mostrar últimos mensajes del historial (ajusta el número según prefieras)
+        for autor, texto in st.session_state.history[-4:]:
             if autor == "bot":
                 with st.chat_message("assistant"):
                     st.markdown(f"**Bot:** {texto}")
@@ -287,8 +292,8 @@ else:
 
                 if enviar:
                     try:
+                        import pandas as pd  # Refuerza la importación aquí por si acaso
                         # Guardar respuestas en un CSV
-                        import pandas as pd  # <-- Vuelve a importar pandas por si acaso
                         resultados = {
                             "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                             "sexo": st.session_state.respuestas.get("sexo", ""),
@@ -313,4 +318,5 @@ else:
                         st.session_state.encuesta_hecha = True
                     except Exception as e:
                         st.error(f"Ocurrió un error al guardar la encuesta: {e}")
+
 
