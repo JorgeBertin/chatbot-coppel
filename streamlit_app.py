@@ -224,8 +224,8 @@ if "catalogo_mujeres" not in st.session_state:
     st.session_state.catalogo_mujeres = None
 
 # Subir catálogos por sexo
-uploaded_hombres = st.sidebar.file_uploader("Sube el catálogo de HOMBRES (Excel .xlsx)", type=["xlsx"], key="hombres")
-uploaded_mujeres = st.sidebar.file_uploader("Sube el catálogo de MUJERES (Excel .xlsx)", type=["xlsx"], key="mujeres")
+#uploaded_hombres = st.sidebar.file_uploader("Sube el catálogo de HOMBRES (Excel .xlsx)", type=["xlsx"], key="hombres")
+#uploaded_mujeres = st.sidebar.file_uploader("Sube el catálogo de MUJERES (Excel .xlsx)", type=["xlsx"], key="mujeres")
 
 if uploaded_hombres:
     st.session_state.catalogo_hombres = pd.read_excel(uploaded_hombres)
