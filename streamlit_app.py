@@ -265,14 +265,7 @@ else:
         else:
             add_message("bot", f"Por favor sube el catálogo de {tipo} en la barra lateral para recomendarte.")
 
-        # Mostrar últimos mensajes del historial
-        for autor, texto in st.session_state.history[-2:]:
-            if autor == "bot":
-                with st.chat_message("assistant"):
-                    st.markdown(f"**Bot:** {texto}")
-            elif autor == "user":
-                with st.chat_message("user"):
-                    st.markdown(f"**Tú:** {texto}")
+        
 
         # ---- ENCUESTA DE SATISFACCIÓN ----
         if "encuesta_hecha" not in st.session_state:
