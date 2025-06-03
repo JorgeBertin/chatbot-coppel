@@ -103,6 +103,9 @@ if st.session_state.step == 0:
             st.session_state.step = 1
         else:
             st.session_state.step = -1
+        # Espera antes de mostrar la siguiente pregunta
+        time.sleep(1)
+        st.experimental_rerun()
 
 elif st.session_state.step == -1:
     pregunta_nombre = "¿Cómo se llama la persona a la que vas a regalar la fragancia?"
@@ -115,6 +118,8 @@ elif st.session_state.step == -1:
         st.session_state.nombre = nombre.strip()
         st.session_state.pregs = ajustar_para_regalo(preguntas_base, nombre.strip())
         st.session_state.step = 1
+        time.sleep(1)
+        st.experimental_rerun()
 
 elif 1 <= st.session_state.step <= len(st.session_state.pregs):
     idx = st.session_state.step - 1
@@ -127,6 +132,8 @@ elif 1 <= st.session_state.step <= len(st.session_state.pregs):
         add_message("user", opcion)
         st.session_state.respuestas[preg["clave"]] = opcion
         st.session_state.step += 1
+        time.sleep(1)
+        st.experimental_rerun()
 
 else:
     nombre = st.session_state.nombre
