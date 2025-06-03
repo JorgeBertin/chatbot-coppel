@@ -258,7 +258,7 @@ if uploaded_mujeres:
 for autor, texto in st.session_state.history:
     if autor == "bot":
         with st.chat_message("assistant"):
-            st.markdown(f"**Bot:** {texto}")
+            st.markdown(f"**Bot:** {texto}", unsafe_allow_html=True)
     elif autor == "user":
         with st.chat_message("user"):
             st.markdown(f"**Tú:** {texto}")
@@ -354,7 +354,7 @@ else:
         for autor, texto in st.session_state.history[-2:]:
             if autor == "bot":
                 with st.chat_message("assistant"):
-                    st.markdown(f"**Bot:** {texto}")
+                    st.markdown(f"**Bot:** {texto}", unsafe_allow_html=True)
             elif autor == "user":
                 with st.chat_message("user"):
                     st.markdown(f"**Tú:** {texto}")
