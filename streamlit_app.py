@@ -38,7 +38,11 @@ with st.container():
 
 # --- PREGUNTAS BASE ---
 preguntas_base = [
-    {"clave": "sexo", "texto": "¿Cuál es tu sexo?", "opciones": ["Masculino", "Femenino"]},
+    {
+        "clave": "sexo",
+        "texto": "¿Cuál es tu sexo?  \n*Si es para regalo, trata de contestar como esa persona.*",
+        "opciones": ["Masculino", "Femenino"]
+    },
     {"clave": "ambiente", "texto": "¿Cuál es tu ambiente favorito?", "opciones": ["Bosque", "Playa", "Ciudad"]},
     {"clave": "estilo", "texto": "¿Qué estilo te define mejor?", "opciones": ["Elegante", "Deportivo", "Romántico"]},
     {"clave": "actividad", "texto": "¿Qué actividad disfrutas más?", "opciones": ["Salir de noche", "Viajar", "Leer un libro"]},
