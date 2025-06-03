@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import random
+import time
 
 st.set_page_config(page_title="Chatbot Coppel", layout="centered")
 
@@ -24,7 +25,6 @@ st.markdown("""
     }
     </style>
 """, unsafe_allow_html=True)
-
 # --- BANNER AMARILLO CON LOGO Y TÍTULO ---
 with st.container():
     col1, col2 = st.columns([1, 4])
@@ -47,14 +47,6 @@ preguntas_base = [
     {"clave": "momento", "texto": "¿Para qué momento la usarías?", "opciones": ["Día", "Noche", "Ambos"]},
 ]
 
-def ajustar_para_regalo(pregs, nombre):
-    preg_regalo = []
-    for p in pregs:
-        p_nueva = p.copy()
-        p_nueva["texto"] = p_nueva["texto"].replace("tu", f"de {nombre}").replace("Te", f"{nombre}").replace("¿Qué", "¿Cuál")
-        preg_regalo.append(p_nueva)
-    return preg_regalo
-
 def add_message(autor, texto):
     if "history" not in st.session_state:
         st.session_state.history = []
@@ -64,14 +56,13 @@ def add_message(autor, texto):
 if "history" not in st.session_state:
     st.session_state.history = []
 if "step" not in st.session_state:
-    st.session_state.step = 0
+    st.session_state.step = 1  # ← Arranca en 1, ya no hay paso 0
 if "respuestas" not in st.session_state:
     st.session_state.respuestas = {}
 if "pregs" not in st.session_state:
-    st.session_state.pregs = []
+    st.session_state.pregs = preguntas_base
 if "nombre" not in st.session_state:
     st.session_state.nombre = "ti"
-# Nuevos para hombre y mujer
 if "catalogo_hombres" not in st.session_state:
     st.session_state.catalogo_hombres = None
 if "catalogo_mujeres" not in st.session_state:
@@ -95,34 +86,8 @@ for autor, texto in st.session_state.history:
         with st.chat_message("user"):
             st.markdown(f"**Tú:** {texto}")
 
-if st.session_state.step == 0:
-    pregunta_inicial = "¿La fragancia es para ti o para regalar?"
-    with st.chat_message("assistant"):
-        st.markdown(f"**Bot:** {pregunta_inicial}")
-    opcion = st.radio("Selecciona:", ["Para mí", "Para regalar"], key="opt0")
-    if st.button("Enviar", key="btn0"):
-        add_message("bot", pregunta_inicial)
-        add_message("user", opcion)
-        if opcion == "Para mí":
-            st.session_state.nombre = "ti"
-            st.session_state.pregs = preguntas_base
-            st.session_state.step = 1
-        else:
-            st.session_state.step = -1
-
-elif st.session_state.step == -1:
-    pregunta_nombre = "¿Cómo se llama la persona a la que vas a regalar la fragancia?"
-    with st.chat_message("assistant"):
-        st.markdown(f"**Bot:** {pregunta_nombre}")
-    nombre = st.text_input("Nombre del destinatario", key="nombre")
-    if st.button("Enviar", key="btn_name") and nombre.strip():
-        add_message("bot", pregunta_nombre)
-        add_message("user", nombre.strip())
-        st.session_state.nombre = nombre.strip()
-        st.session_state.pregs = ajustar_para_regalo(preguntas_base, nombre.strip())
-        st.session_state.step = 1
-
-elif 1 <= st.session_state.step <= len(st.session_state.pregs):
+# Flujo de preguntas y respuestas
+if 1 <= st.session_state.step <= len(st.session_state.pregs):
     idx = st.session_state.step - 1
     preg = st.session_state.pregs[idx]
     with st.chat_message("assistant"):
@@ -175,3 +140,4 @@ else:
         elif autor == "user":
             with st.chat_message("user"):
                 st.markdown(f"**Tú:** {texto}")
+
