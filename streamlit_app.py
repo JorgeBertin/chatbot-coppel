@@ -288,6 +288,7 @@ else:
                 if enviar:
                     try:
                         # Guardar respuestas en un CSV
+                        import pandas as pd
                         resultados = {
                             "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                             "sexo": st.session_state.respuestas.get("sexo", ""),
