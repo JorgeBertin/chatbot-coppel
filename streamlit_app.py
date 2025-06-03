@@ -21,7 +21,7 @@ st.markdown("""
         margin-left: 0 !important;
     }
     .block-container {
-        padding-top: 42px !important;
+        padding-top: 35px !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -36,6 +36,7 @@ with st.container():
             unsafe_allow_html=True
         )
 # --- RESTO DE LA APP ---
+# --- RESTO DEL CÓDIGO IGUAL ---
 preguntas_base = [
     {"clave": "ambiente", "texto": "¿Cuál es tu ambiente favorito?", "opciones": ["Bosque", "Playa", "Ciudad"]},
     {"clave": "estilo", "texto": "¿Qué estilo te define mejor?", "opciones": ["Elegante", "Deportivo", "Romántico"]},
@@ -77,10 +78,14 @@ uploaded = st.sidebar.file_uploader("Sube el catálogo (Excel .xlsx)", type=["xl
 if uploaded:
     st.session_state.catalogo = pd.read_excel(uploaded)
 
-# Mostrar historial chat
+# Mostrar historial chat, personalizando los iconos/textos:
 for autor, texto in st.session_state.history:
-    with st.chat_message(autor):
-        st.markdown(texto)
+    if autor == "bot":
+        with st.chat_message("assistant", avatar="C"):
+            st.markdown(f"**Coppel:** {texto}")
+    elif autor == "user":
+        with st.chat_message("user", avatar="🧑"):
+            st.markdown(f"**Tú:** {texto}")
 
 if st.session_state.step == 0:
     pregunta_inicial = "¿La fragancia es para ti o para regalar?"
@@ -142,8 +147,12 @@ else:
 
     # Mostrar últimos mensajes (evitar repetir todo el historial)
     for autor, texto in st.session_state.history[-4:]:
-        with st.chat_message(autor):
-            st.markdown(texto)
+        if autor == "bot":
+            with st.chat_message("assistant", avatar="C"):
+                st.markdown(f"**Coppel:** {texto}")
+        elif autor == "user":
+            with st.chat_message("user", avatar="🧑"):
+                st.markdown(f"**Tú:** {texto}")
 
 
 
