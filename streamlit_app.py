@@ -2,10 +2,9 @@ import streamlit as st
 import pandas as pd
 import random
 
-# Cambia el título de la pestaña y centra el layout
 st.set_page_config(page_title="Chatbot Coppel", layout="centered")
 
-# --- BANNER AMARILLO CON LOGO ---
+# --- BANNER AMARILLO CON LOGO Y TÍTULO ---
 st.markdown("""
     <style>
     .coppel-header {
@@ -32,18 +31,12 @@ st.markdown("""
     }
     </style>
     <div class="coppel-header">
-        <img src="app/static/coppel_logo.png" class="coppel-logo">
+        <img src="coppel_logo.png" class="coppel-logo">
         <span class="coppel-title">Chatbot Coppel</span>
     </div>
     """, unsafe_allow_html=True)
 
-# OJO: Cambia la ruta en src="..." a:
-# Si corres local, usa: src="file.png"
-# Si corres en Streamlit Cloud, sube la imagen y pon el nombre: src="618ddf55-be7b-4b8d-8788-ca01f7e801fe.png"
-
-# ... el resto de tu código sigue igual ...
-
-# Preguntas base, funciones y lógica que ya tenías
+# --- RESTO DE LA APP ---
 preguntas_base = [
     {"clave": "ambiente", "texto": "¿Cuál es tu ambiente favorito?", "opciones": ["Bosque", "Playa", "Ciudad"]},
     {"clave": "estilo", "texto": "¿Qué estilo te define mejor?", "opciones": ["Elegante", "Deportivo", "Romántico"]},
@@ -66,7 +59,7 @@ def add_message(autor, texto):
         st.session_state.history = []
     st.session_state.history.append((autor, texto))
 
-# Inicialización
+# Inicialización de session_state
 if "history" not in st.session_state:
     st.session_state.history = []
 if "step" not in st.session_state:
@@ -80,9 +73,7 @@ if "nombre" not in st.session_state:
 if "catalogo" not in st.session_state:
     st.session_state.catalogo = None
 
-# El título ya va en el header así que aquí lo quitamos
-# st.title("💬 Chatbot Coppel")
-
+# Subir catálogo
 uploaded = st.sidebar.file_uploader("Sube el catálogo (Excel .xlsx)", type=["xlsx"])
 if uploaded:
     st.session_state.catalogo = pd.read_excel(uploaded)
@@ -149,4 +140,5 @@ else:
     for autor, texto in st.session_state.history[-4:]:
         with st.chat_message(autor):
             st.markdown(texto)
+
 
