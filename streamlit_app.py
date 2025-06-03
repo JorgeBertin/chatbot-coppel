@@ -265,7 +265,14 @@ else:
         else:
             add_message("bot", f"Por favor sube el catálogo de {tipo} en la barra lateral para recomendarte.")
 
-        
+        # Mostrar últimos mensajes del historial
+        for autor, texto in st.session_state.history[-2:]:
+            if autor == "bot":
+                with st.chat_message("assistant"):
+                    st.markdown(f"**Bot:** {texto}")
+            elif autor == "user":
+                with st.chat_message("user"):
+                    st.markdown(f"**Tú:** {texto}")
 
         # ---- ENCUESTA DE SATISFACCIÓN ----
         if "encuesta_hecha" not in st.session_state:
@@ -281,7 +288,7 @@ else:
                 if enviar:
                     try:
                         # Guardar respuestas en un CSV
-                        import pandas as pd
+                        import pandas as pd  # <-- Vuelve a importar pandas por si acaso
                         resultados = {
                             "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                             "sexo": st.session_state.respuestas.get("sexo", ""),
@@ -306,5 +313,4 @@ else:
                         st.session_state.encuesta_hecha = True
                     except Exception as e:
                         st.error(f"Ocurrió un error al guardar la encuesta: {e}")
-
 
