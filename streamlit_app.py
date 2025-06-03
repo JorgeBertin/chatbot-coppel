@@ -277,29 +277,32 @@ else:
                 enviar = st.form_submit_button("Enviar encuesta")
 
                 if enviar:
-                    # Guardar respuestas en un CSV
-                    resultados = {
-                        "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                        "sexo": st.session_state.respuestas.get("sexo", ""),
-                        "ambiente": st.session_state.respuestas.get("ambiente", ""),
-                        "estilo": st.session_state.respuestas.get("estilo", ""),
-                        "actividad": st.session_state.respuestas.get("actividad", ""),
-                        "clima": st.session_state.respuestas.get("clima", ""),
-                        "intensidad": st.session_state.respuestas.get("intensidad", ""),
-                        "momento": st.session_state.respuestas.get("momento", ""),
-                        "satisfaccion": satisfaccion,
-                        "comentario": comentario
-                    }
-                    df_resultado = pd.DataFrame([resultados])
+                    try:
+                        # Guardar respuestas en un CSV
+                        resultados = {
+                            "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                            "sexo": st.session_state.respuestas.get("sexo", ""),
+                            "ambiente": st.session_state.respuestas.get("ambiente", ""),
+                            "estilo": st.session_state.respuestas.get("estilo", ""),
+                            "actividad": st.session_state.respuestas.get("actividad", ""),
+                            "clima": st.session_state.respuestas.get("clima", ""),
+                            "intensidad": st.session_state.respuestas.get("intensidad", ""),
+                            "momento": st.session_state.respuestas.get("momento", ""),
+                            "satisfaccion": satisfaccion,
+                            "comentario": comentario
+                        }
+                        df_resultado = pd.DataFrame([resultados])
 
-                    archivo = "resultados_encuesta.csv"
-                    if os.path.exists(archivo):
-                        df_resultado.to_csv(archivo, mode='a', header=False, index=False)
-                    else:
-                        df_resultado.to_csv(archivo, index=False)
+                        archivo = "resultados_encuesta.csv"
+                        if os.path.exists(archivo):
+                            df_resultado.to_csv(archivo, mode='a', header=False, index=False)
+                        else:
+                            df_resultado.to_csv(archivo, index=False)
 
-                    st.success("¡Gracias por tu opinión!")
-                    st.session_state.encuesta_hecha = True
+                        st.success("¡Gracias por tu opinión!")
+                        st.session_state.encuesta_hecha = True
+                    except Exception as e:
+                        st.error(f"Ocurrió un error al guardar la encuesta: {e}")
 
         # Mostrar últimos mensajes (evitar repetir todo el historial)
         for autor, texto in st.session_state.history[-6:]:
@@ -309,4 +312,5 @@ else:
             elif autor == "user":
                 with st.chat_message("user"):
                     st.markdown(f"**Tú:** {texto}")
+
 
