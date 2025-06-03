@@ -4,6 +4,31 @@ import random
 
 st.set_page_config(page_title="Chatbot Coppel", layout="centered")
 
+# --- CSS para compactar los mensajes de chat ---
+st.markdown("""
+    <style>
+    /* Reduce padding y margen de las burbujas del chat */
+    .element-container:has(.stChatMessage) {
+        margin-bottom: 2px !important;
+    }
+    .stChatMessage {
+        padding: 10px 18px !important;
+        margin-bottom: 0px !important;
+        min-height: 10px !important;
+    }
+    .stChatMessageContent {
+        padding: 4px 0 !important;
+    }
+    .stChatMessageIcon {
+        margin-right: 6px !important;
+        margin-left: 0 !important;
+    }
+    /* Opcional: reduce el espacio abajo del header */
+    .block-container {
+        padding-top: 22px !important;
+    }
+    </style>
+""", unsafe_allow_html=True)
 # --- BANNER AMARILLO CON LOGO Y TÍTULO ---
 with st.container():
     col1, col2 = st.columns([1, 4])
