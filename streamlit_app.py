@@ -37,7 +37,6 @@ with st.container():
             unsafe_allow_html=True
         )
 # --- RESTO DE LA APP ---
-
 # --- PREGUNTAS BASE ---
 preguntas_base = [
     {"clave": "sexo", "texto": "¿Cuál es tu sexo?", "opciones": ["Masculino", "Femenino"]},
@@ -104,6 +103,8 @@ if st.session_state.step == 0:
             st.session_state.step = 1
         else:
             st.session_state.step = -1
+        with st.spinner("Bot está pensando..."):
+            time.sleep(1)
 
 elif st.session_state.step == -1:
     pregunta_nombre = "¿Cómo se llama la persona a la que vas a regalar la fragancia?"
@@ -116,6 +117,8 @@ elif st.session_state.step == -1:
         st.session_state.nombre = nombre.strip()
         st.session_state.pregs = ajustar_para_regalo(preguntas_base, nombre.strip())
         st.session_state.step = 1
+        with st.spinner("Bot está pensando..."):
+            time.sleep(1)
 
 elif 1 <= st.session_state.step <= len(st.session_state.pregs):
     idx = st.session_state.step - 1
@@ -128,6 +131,8 @@ elif 1 <= st.session_state.step <= len(st.session_state.pregs):
         add_message("user", opcion)
         st.session_state.respuestas[preg["clave"]] = opcion
         st.session_state.step += 1
+        with st.spinner("Bot está pensando..."):
+            time.sleep(1)
 
 else:
     nombre = st.session_state.nombre
@@ -139,15 +144,25 @@ else:
     add_message("bot", descripcion)
 
     if st.session_state.catalogo is not None:
-        rec = st.session_state.catalogo.sample(1).iloc[0]
-        prod = rec["C_producto"]
-        po = rec["C_precio_original"]
-        pd = rec["C_precio_descuento"]
-        ahorro = po - pd
-        texto_rec = (f"Te recomendamos **{prod}**\n\n"
-                     f"- Precio original: ${po:.2f}\n"
-                     f"- Precio con descuento: ${pd:.2f} (ahorras ${ahorro:.2f})")
-        add_message("bot", texto_rec)
+        sexo_usuario = st.session_state.respuestas.get("sexo", None)
+        if sexo_usuario:
+            df_filtrado = st.session_state.catalogo[
+                st.session_state.catalogo["SEXO"].str.lower() == sexo_usuario.lower()
+            ]
+            if len(df_filtrado) > 0:
+                rec = df_filtrado.sample(1).iloc[0]
+                prod = rec["C_producto"]
+                po = rec["C_precio_original"]
+                pd = rec["C_precio_descuento"]
+                ahorro = po - pd
+                texto_rec = (f"Te recomendamos **{prod}**\n\n"
+                             f"- Precio original: ${po:.2f}\n"
+                             f"- Precio con descuento: ${pd:.2f} (ahorras ${ahorro:.2f})")
+                add_message("bot", texto_rec)
+            else:
+                add_message("bot", "No encontramos productos para el sexo seleccionado. Intenta con otro catálogo.")
+        else:
+            add_message("bot", "No se seleccionó el sexo. Por favor, responde todas las preguntas.")
     else:
         add_message("bot", "Por favor sube el catálogo en la barra lateral para recomendarte.")
 
