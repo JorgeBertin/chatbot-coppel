@@ -180,6 +180,9 @@ for autor, texto in st.session_state.history:
         with st.chat_message("user"):
             st.markdown(f"**Tú:** {texto}")
 
+# AUTOSCROLL marcador después del historial
+st.markdown('<div id="chat_end"></div>', unsafe_allow_html=True)
+
 # Flujo de preguntas y respuestas
 if 1 <= st.session_state.step <= len(st.session_state.pregs):
     idx = st.session_state.step - 1
@@ -273,4 +276,16 @@ else:
             elif autor == "user":
                 with st.chat_message("user"):
                     st.markdown(f"**Tú:** {texto}")
+
+        # AUTOSCROLL marcador después del historial
+        st.markdown('<div id="chat_end"></div>', unsafe_allow_html=True)
+
+# --- AUTOSCROLL AL FINAL DEL CHAT ---
+st.markdown("""
+    <script>
+    var chatEnd = document.getElementById('chat_end');
+    if (chatEnd) { chatEnd.scrollIntoView({ behavior: 'smooth' }); }
+    </script>
+""", unsafe_allow_html=True)
+
 
