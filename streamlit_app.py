@@ -152,7 +152,7 @@ else:
     f"    - Precio con descuento: ${pd:.2f}\n"
     f"    - **Ahorras: ${ahorro:.2f}**"
 )
-            texto_rec = "Te recomendamos las siguientes fragancias:\n\n" + "\n\n".join(recomendaciones)
+            texto_rec = "Con base en tus respuestas te recomendamos las siguientes fragancias:\n\n" + "\n\n".join(recomendaciones)
             add_message("bot", texto_rec)
         else:
             add_message("bot", f"Por favor sube el catálogo de {tipo} en la barra lateral para recomendarte.")
