@@ -41,7 +41,7 @@ preguntas_base = [
     {
         "clave": "inicio",
         "texto": "Hola, soy el nuevo chatbot de fragancias de Coppel. ¿Estás listo para empezar con el test?",
-        "opciones": ["Sí", "No"]
+        "opciones": ["Sí", "Obvioo"]
     },
     {
         "clave": "sexo",
