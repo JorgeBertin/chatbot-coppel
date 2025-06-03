@@ -57,6 +57,19 @@ preguntas_base = [
     {"clave": "intensidad", "texto": "¿Qué intensidad de aroma prefieres?", "opciones": ["Suave", "Moderado", "Intenso"]},
     {"clave": "momento", "texto": "¿Para qué momento la usarías?", "opciones": ["Día", "Noche", "Ambos"]},
 ]
+encuesta_base = [
+    {
+        "clave": "satisfaccion",
+        "texto": "¿Qué tan satisfecho(a) estás con la recomendación?",
+        "opciones": ["Muy satisfecho(a)", "Satisfecho(a)", "Poco satisfecho(a)", "Nada satisfecho(a)"]
+    },
+    {
+        "clave": "comentario",
+        "texto": "¿Tienes algún comentario o sugerencia?",
+        "opciones": None  # Usaremos un text_area
+    }
+]
+
 
 # --- RESPALDO HOMBRES ---
 respaldo_hombres = [
