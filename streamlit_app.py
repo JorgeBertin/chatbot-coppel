@@ -149,9 +149,9 @@ else:
     for autor, texto in st.session_state.history[-4:]:
         if autor == "bot":
             with st.chat_message("assistant", avatar="C"):
-                st.markdown(f"**Coppel:** {texto}")
+                st.markdown(f"**Bot:** {texto}")
         elif autor == "user":
-            with st.chat_message("user", avatar="🧑"):
+            with st.chat_message("user", avatar="T"):
                 st.markdown(f"**Tú:** {texto}")
 
 
