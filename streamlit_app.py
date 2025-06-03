@@ -12,9 +12,9 @@ with st.container():
         <div style="display: flex; align-items: center;">
         """, unsafe_allow_html=True
     )
-    col1, col2 = st.columns([1, 6])
+    col1, col2 = st.columns([2, 5])  # Puedes ajustar proporciones aquí si lo ves necesario
     with col1:
-        st.image("coppel_logo1.png", width=70)
+        st.image("coppel_logo1.png")  # Sin width para que respete el tamaño real
     with col2:
         st.markdown(
             "<span style='font-family: Montserrat, Arial, sans-serif; font-size: 2.3rem; color: #174ea6; font-weight: 700;'>Chatbot Coppel</span>",
@@ -126,6 +126,4 @@ else:
     for autor, texto in st.session_state.history[-4:]:
         with st.chat_message(autor):
             st.markdown(texto)
-
-
 
