@@ -5,36 +5,22 @@ import random
 st.set_page_config(page_title="Chatbot Coppel", layout="centered")
 
 # --- BANNER AMARILLO CON LOGO Y TÍTULO ---
-st.markdown("""
-    <style>
-    .coppel-header {
-        background-color: #ffe138;
-        padding: 16px 24px 16px 24px;
-        border-radius: 16px;
-        margin-bottom: 24px;
-        display: flex;
-        align-items: center;
-    }
-    .coppel-logo {
-        height: 60px;
-        margin-right: 24px;
-        border-radius: 8px;
-        background: white;
-        padding: 4px;
-    }
-    .coppel-title {
-        font-family: 'Montserrat', 'Arial', sans-serif;
-        font-size: 2.3rem;
-        color: #174ea6;
-        font-weight: 700;
-        margin: 0;
-    }
-    </style>
-    <div class="coppel-header">
-        <img src="coppel_logo.png" class="coppel-logo">
-        <span class="coppel-title">Chatbot Coppel</span>
-    </div>
-    """, unsafe_allow_html=True)
+with st.container():
+    st.markdown(
+        """
+        <div style="background-color: #ffe138; padding: 16px 24px 16px 24px; border-radius: 16px; margin-bottom: 24px;">
+        <div style="display: flex; align-items: center;">
+        """, unsafe_allow_html=True
+    )
+    col1, col2 = st.columns([1, 6])
+    with col1:
+        st.image("coppel_logo.png", width=60)
+    with col2:
+        st.markdown(
+            "<span style='font-family: Montserrat, Arial, sans-serif; font-size: 2.3rem; color: #174ea6; font-weight: 700;'>Chatbot Coppel</span>",
+            unsafe_allow_html=True
+        )
+    st.markdown("</div></div>", unsafe_allow_html=True)
 
 # --- RESTO DE LA APP ---
 preguntas_base = [
@@ -140,5 +126,6 @@ else:
     for autor, texto in st.session_state.history[-4:]:
         with st.chat_message(autor):
             st.markdown(texto)
+
 
 
