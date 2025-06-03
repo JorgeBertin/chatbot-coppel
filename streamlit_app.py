@@ -8,7 +8,7 @@ st.set_page_config(page_title="Chatbot Coppel", layout="centered")
 with st.container():
     col1, col2 = st.columns([1, 4])
     with col1:
-        st.image("coppel_logo1.png", width=80)  # Ajusta el width si lo quieres más pequeño
+        st.image("coppel_logo3.png", width=80)  # Ajusta el width si lo quieres más pequeño
     with col2:
         st.markdown(
             "<span style='font-family: Montserrat, Arial, sans-serif; font-size: 1.7rem; color: #174ea6; font-weight: 700; vertical-align: middle;'>Chatbot Coppel</span>",
