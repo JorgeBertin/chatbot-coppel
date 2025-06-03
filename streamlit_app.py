@@ -55,13 +55,10 @@ st.markdown("""
 # --- BANNER LOGO + TÍTULO EN STICKY ---
 st.markdown("""
 <div class="sticky-banner-coppel">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/3/38/Logo_Coppel.png" alt="Coppel Logo">
+    <img src="coppel_logo4.png" alt="Coppel Logo">
     <span class="sticky-banner-coppel-title">Chatbot Coppel</span>
 </div>
 """, unsafe_allow_html=True)
-
-
-
 
 
 # --- PREGUNTAS BASE ---
