@@ -90,39 +90,80 @@ respaldo_hombres = [
         "C_precio_original": 1514,
         "C_precio_descuento": 1333
     },
+    {
+        "C_producto": "Perfume Dior Homme Eau De Toilette 50 Ml Para Hombre - Venta Internacional.",
+        "C_precio_original": 3242,
+        "C_precio_descuento": 2756
+    },
+    {
+        "C_producto": "Perfume Michael Kors Pour Homme Eau De Parfum 100 Ml Para Hombre - Venta Internacional.",
+        "C_precio_original": 2686,
+        "C_precio_descuento": 2364
+    },
+    {
+        "C_producto": "Perfume Giorgio Armani Emporio Diamonds para Hombre 2 Piezas - Venta Internacional",
+        "C_precio_original": 1766,
+        "C_precio_descuento": 1555
+    },
+    {
+        "C_producto": "Perfume Montblanc Legend Spirit Eau De Toilette 50 Ml Para Hombre - Venta Internacional.",
+        "C_precio_original": 2656,
+        "C_precio_descuento": 2258
+    },
+    {
+        "C_producto": "Perfume Paco Rabanne Invictus Eau De Toilette 100 ml para Hombre - Venta Internacional",
+        "C_precio_original": 3132,
+        "C_precio_descuento": 2757
+    },
+    {
+        "C_producto": "Perfume Coach Blue Edt 100 Ml Para Hombre - Venta Internacional.",
+        "C_precio_original": 3609,
+        "C_precio_descuento": 3068
+    },
+    {
+        "C_producto": "Perfume Valentino Born In Roma Green Stravaganza Edt 100 Ml Para Hombre - Venta Internacional.",
+        "C_precio_original": 3505,
+        "C_precio_descuento": 2980
+    },
+    {
+        "C_producto": "Perfume Dolce And Gabbana The One para Hombre Woody Spicy - Venta Internacional",
+        "C_precio_original": 1323,
+        "C_precio_descuento": 1503
+    },
+    
 ]
 
 # --- RESPALDO MUJERES ---
 respaldo_mujeres = [
     {
         "C_producto": "Perfume Carolina Herrera 212 Vip Rosé 80 ml Edp Original para Dama",
-        "C_precio_original": 1848,
-        "C_precio_descuento": 2981
+        "C_precio_original": 2981,
+        "C_precio_descuento": 1848
     },
     {
         "C_producto": "Perfume Carolina Herrera Good Girl Eau de Parfum 150 ml para Mujer",
-        "C_precio_original": 2563,
-        "C_precio_descuento": 3770
+        "C_precio_original": 3770,
+        "C_precio_descuento": 2563
     },
     {
         "C_producto": "Perfume Carolina Herrera Good Girl Eau de Parfum 100 ml para Mujer",
-        "C_precio_original": 4140,
-        "C_precio_descuento": 4599
+        "C_precio_original": 4599,
+        "C_precio_descuento": 4140
     },
     {
         "C_producto": "Perfume Dior Hypnotic Poison Eau De Toilette 30 Ml Para Mujer - Venta Internacional.",
-        "C_precio_original": 1877,
-        "C_precio_descuento": 2606
+        "C_precio_original": 2606,
+        "C_precio_descuento": 1877
     },
     {
         "C_producto": "Perfume Dior Addict de Christian Dior Eau de Toilette de 100 ml para Mujer",
-        "C_precio_original": 2121,
-        "C_precio_descuento": 4079
+        "C_precio_original": 4079,
+        "C_precio_descuento": 2121
     },
     {
         "C_producto": "Perfume The Merchant Of Venice Damascus Desert Eau De Parfum 100 Ml - Venta Internacional",
-        "C_precio_original": 2301,
-        "C_precio_descuento": 2614
+        "C_precio_original": 2614,
+        "C_precio_descuento": 2301
     },
     {
         "C_producto": "Perfume Chanel Coco Mademoiselle Edp para Mujer-Venta Internacional",
@@ -131,13 +172,33 @@ respaldo_mujeres = [
     },
     {
         "C_producto": "Perfume Yves Saint Laurent Libre Eau De Toilette 90 ml para Mujer",
-        "C_precio_original": 2389,
-        "C_precio_descuento": 3109
+        "C_precio_original": 3109,
+        "C_precio_descuento": 2389
     },
     {
         "C_producto": "Perfume Yves Saint Laurent Paris Eau De Toilette 125 Ml Para Mujer - Venta Internacional",
-        "C_precio_original": 3365,
-        "C_precio_descuento": 3823
+        "C_precio_original": 3823,
+        "C_precio_descuento": 3365
+    },
+    {
+        "C_producto": "Perfume Burberry London Dream Eau De Parfum Para Mujer, 100 Ml - Venta Internacional.",
+        "C_precio_original": 2443,
+        "C_precio_descuento": 2150
+    },
+    {
+        "C_producto": "Perfume Michael Kors Wonderlust Eau De Parfum para Mujer 50 ml - Venta Internacional",
+        "C_precio_original": 1433,
+        "C_precio_descuento": 1262
+    },
+    {
+        "C_producto": "Perfume Roberto Cavalli Paradiso Edp 75 Ml para Mujer - Venta Internacional",
+        "C_precio_original": 1655,
+        "C_precio_descuento": 1457
+    },
+    {
+        "C_producto": "Perfume Hermes Twilly D'hermes Eau de Parfum para Mujer 85 ml - Venta Internacional",
+        "C_precio_original": 3006,
+        "C_precio_descuento": 2646
     },
 ]
 
