@@ -14,7 +14,7 @@ with st.container():
     )
     col1, col2 = st.columns([1, 6])
     with col1:
-        st.image("coppel_logo.png", width=70)
+        st.image("coppel_logo1.png", width=70)
     with col2:
         st.markdown(
             "<span style='font-family: Montserrat, Arial, sans-serif; font-size: 2.3rem; color: #174ea6; font-weight: 700;'>Chatbot Coppel</span>",
