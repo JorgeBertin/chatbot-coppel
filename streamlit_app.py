@@ -14,7 +14,7 @@ with st.container():
     )
     col1, col2 = st.columns([1, 6])  # Logo más pequeño, título más ancho
     with col1:
-        st.image("coppel_logo1.png", width=80)  # Puedes ajustar el width (prueba 70-90)
+        st.image("coppel_logo1.png", width=100)  # Puedes ajustar el width (prueba 70-90)
     with col2:
         st.markdown(
             "<span style='font-family: Montserrat, Arial, sans-serif; font-size: 2.3rem; color: #174ea6; font-weight: 700;'>Chatbot Coppel</span>",
