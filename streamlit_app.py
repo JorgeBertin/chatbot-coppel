@@ -6,21 +6,15 @@ st.set_page_config(page_title="Chatbot Coppel", layout="centered")
 
 # --- BANNER AMARILLO CON LOGO Y TÍTULO ---
 with st.container():
-    st.markdown(
-        """
-        <div style="background-color: #ffe138; padding: 16px 24px 16px 24px; border-radius: 16px; margin-bottom: 24px;">
-        <div style="display: flex; align-items: center;">
-        """, unsafe_allow_html=True
-    )
-    col1, col2 = st.columns([2, 5])  # Puedes ajustar proporciones aquí si lo ves necesario
+    col1, col2 = st.columns([1, 4])
     with col1:
-        st.image("coppel_logo3.png")  # Sin width para que respete el tamaño real
+        st.image("coppel_logo1.png", width=80)  # Ajusta el width si lo quieres más pequeño
     with col2:
         st.markdown(
-            "<span style='font-family: Montserrat, Arial, sans-serif; font-size: 2.3rem; color: #174ea6; font-weight: 700;'>Chatbot Coppel</span>",
+            "<span style='font-family: Montserrat, Arial, sans-serif; font-size: 1.7rem; color: #174ea6; font-weight: 700; vertical-align: middle;'>Chatbot Coppel</span>",
             unsafe_allow_html=True
         )
-    st.markdown("</div></div>", unsafe_allow_html=True)
+
 
 # --- RESTO DE LA APP ---
 preguntas_base = [
