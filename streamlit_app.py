@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 import random
+import datetime
+import os
 
 st.set_page_config(page_title="Chatbot Coppel", layout="centered")
 
@@ -263,6 +265,42 @@ else:
         else:
             add_message("bot", f"Por favor sube el catálogo de {tipo} en la barra lateral para recomendarte.")
 
+        # ---- ENCUESTA DE SATISFACCIÓN ----
+        if "encuesta_hecha" not in st.session_state:
+            st.session_state.encuesta_hecha = False
+
+        if not st.session_state.encuesta_hecha:
+            with st.form("encuesta_satisfaccion"):
+                st.markdown("### 📝 Encuesta de Satisfacción")
+                satisfaccion = st.radio("¿Qué tan satisfecho(a) estás con la recomendación?", ["Muy satisfecho(a)", "Satisfecho(a)", "Poco satisfecho(a)", "Nada satisfecho(a)"])
+                comentario = st.text_area("¿Tienes algún comentario o sugerencia?")
+                enviar = st.form_submit_button("Enviar encuesta")
+
+                if enviar:
+                    # Guardar respuestas en un CSV
+                    resultados = {
+                        "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                        "sexo": st.session_state.respuestas.get("sexo", ""),
+                        "ambiente": st.session_state.respuestas.get("ambiente", ""),
+                        "estilo": st.session_state.respuestas.get("estilo", ""),
+                        "actividad": st.session_state.respuestas.get("actividad", ""),
+                        "clima": st.session_state.respuestas.get("clima", ""),
+                        "intensidad": st.session_state.respuestas.get("intensidad", ""),
+                        "momento": st.session_state.respuestas.get("momento", ""),
+                        "satisfaccion": satisfaccion,
+                        "comentario": comentario
+                    }
+                    df_resultado = pd.DataFrame([resultados])
+
+                    archivo = "resultados_encuesta.csv"
+                    if os.path.exists(archivo):
+                        df_resultado.to_csv(archivo, mode='a', header=False, index=False)
+                    else:
+                        df_resultado.to_csv(archivo, index=False)
+
+                    st.success("¡Gracias por tu opinión!")
+                    st.session_state.encuesta_hecha = True
+
         # Mostrar últimos mensajes (evitar repetir todo el historial)
         for autor, texto in st.session_state.history[-6:]:
             if autor == "bot":
@@ -271,5 +309,4 @@ else:
             elif autor == "user":
                 with st.chat_message("user"):
                     st.markdown(f"**Tú:** {texto}")
-
 
