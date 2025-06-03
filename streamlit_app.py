@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import random
+import time
 
 st.set_page_config(page_title="Chatbot Coppel", layout="centered")
 
