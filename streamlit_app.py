@@ -146,11 +146,11 @@ def add_message(autor, texto):
         st.session_state.history = []
     st.session_state.history.append((autor, texto))
 
-# Inicialización de session_state
+# --- Inicialización de estados ---
 if "history" not in st.session_state:
     st.session_state.history = []
 if "step" not in st.session_state:
-    st.session_state.step = 1  # Ahora inicia con la primera pregunta
+    st.session_state.step = 1
 if "respuestas" not in st.session_state:
     st.session_state.respuestas = {}
 if "pregs" not in st.session_state:
@@ -163,8 +163,12 @@ if "catalogo_mujeres" not in st.session_state:
     st.session_state.catalogo_mujeres = None
 if "resultados_mostrados" not in st.session_state:
     st.session_state.resultados_mostrados = False
+if "descripcion_generada" not in st.session_state:
+    st.session_state.descripcion_generada = None
+if "recomendaciones_generadas" not in st.session_state:
+    st.session_state.recomendaciones_generadas = None
 
-# Subir catálogos por sexo
+# --- Carga de catálogos ---
 uploaded_hombres = st.sidebar.file_uploader("Sube el catálogo de HOMBRES (Excel .xlsx)", type=["xlsx"], key="hombres")
 uploaded_mujeres = st.sidebar.file_uploader("Sube el catálogo de MUJERES (Excel .xlsx)", type=["xlsx"], key="mujeres")
 
@@ -173,7 +177,7 @@ if uploaded_hombres:
 if uploaded_mujeres:
     st.session_state.catalogo_mujeres = pd.read_excel(uploaded_mujeres)
 
-# Mostrar historial chat SIN avatar, solo "Bot:" y "Tú:"
+# --- Mostrar historial del chat ---
 for autor, texto in st.session_state.history:
     if autor == "bot":
         with st.chat_message("assistant"):
@@ -182,7 +186,7 @@ for autor, texto in st.session_state.history:
         with st.chat_message("user"):
             st.markdown(f"**Tú:** {texto}")
 
-# Flujo de preguntas y respuestas
+# --- Flujo principal ---
 if 1 <= st.session_state.step <= len(st.session_state.pregs):
     idx = st.session_state.step - 1
     preg = st.session_state.pregs[idx]
@@ -194,10 +198,9 @@ if 1 <= st.session_state.step <= len(st.session_state.pregs):
         add_message("user", opcion)
         st.session_state.respuestas[preg["clave"]] = opcion
 
-        # Si responde "No" en la bienvenida, termina el flujo con un mensaje de despedida
         if preg["clave"] == "inicio" and opcion == "No":
             add_message("bot", "¡No hay problema! Cuando quieras, vuelve a iniciar el test. 😊")
-            st.session_state.step = len(st.session_state.pregs) + 1  # Salta al final
+            st.session_state.step = len(st.session_state.pregs) + 1
         else:
             st.session_state.step += 1
 
@@ -205,16 +208,17 @@ else:
     nombre = st.session_state.nombre
     r = st.session_state.respuestas
     if r.get("inicio") == "No":
-        # Ya se mostró el mensaje de despedida, no hacer más.
         pass
     else:
         if not st.session_state.resultados_mostrados:
             sujeto = "eres" if nombre == "ti" else f"{nombre} es"
-            descripcion = (f"¡Gracias! Según tus respuestas, {sujeto} alguien que disfruta del ambiente **{r.get('ambiente','').lower()}**, "
-                        f"con un estilo **{r.get('estilo','').lower()}**, y prefiere fragancias de intensidad **{r.get('intensidad','').lower()}**. "
-                        f"Ideal para momentos de **{r.get('actividad','').lower()}**.")
+            descripcion = (
+                f"¡Gracias! Según tus respuestas, {sujeto} alguien que disfruta del ambiente **{r.get('ambiente','').lower()}**, "
+                f"con un estilo **{r.get('estilo','').lower()}**, y prefiere fragancias de intensidad **{r.get('intensidad','').lower()}**. "
+                f"Ideal para momentos de **{r.get('actividad','').lower()}**."
+            )
+            st.session_state.descripcion_generada = descripcion
 
-            # --- CORRECCIÓN DEL RESPALDO ---
             sexo_usuario = st.session_state.respuestas.get("sexo", "").strip().lower()
             if sexo_usuario == "masculino":
                 catalogo = st.session_state.catalogo_hombres
@@ -244,8 +248,7 @@ else:
                         f"    - **Ahorras: ${ahorro:.2f}**"
                     )
                 texto_rec = "Te recomendamos las siguientes fragancias:\n\n" + "\n\n".join(recomendaciones)
-                add_message("bot", descripcion)
-                add_message("bot", texto_rec)
+                st.session_state.recomendaciones_generadas = texto_rec
             elif respaldo and len(respaldo) > 0:
                 muestras = random.sample(respaldo, min(3, len(respaldo)))
                 recomendaciones = []
@@ -264,13 +267,19 @@ else:
                     "Te recomendamos las siguientes fragancias (usando catálogo de respaldo de Coppel):\n\n" +
                     "\n\n".join(recomendaciones)
                 )
-                add_message("bot", descripcion)
-                add_message("bot", texto_rec)
+                st.session_state.recomendaciones_generadas = texto_rec
             else:
-                add_message("bot", f"Por favor sube el catálogo de {tipo} en la barra lateral para recomendarte.")
+                st.session_state.recomendaciones_generadas = f"Por favor sube el catálogo de {tipo} en la barra lateral para recomendarte."
             st.session_state.resultados_mostrados = True
 
-        # Mostrar últimos mensajes del historial (ajusta el número según prefieras)
+        # Evitar duplicados (solo agrega una vez)
+        ultimos = [t for _, t in st.session_state.history[-4:]]
+        if st.session_state.descripcion_generada and st.session_state.descripcion_generada not in ultimos:
+            add_message("bot", st.session_state.descripcion_generada)
+        if st.session_state.recomendaciones_generadas and st.session_state.recomendaciones_generadas not in ultimos:
+            add_message("bot", st.session_state.recomendaciones_generadas)
+
+        # Mostrar últimos mensajes
         for autor, texto in st.session_state.history[-4:]:
             if autor == "bot":
                 with st.chat_message("assistant"):
@@ -292,8 +301,7 @@ else:
 
                 if enviar:
                     try:
-                        import pandas as pd  # Refuerza la importación aquí por si acaso
-                        # Guardar respuestas en un CSV
+                        import pandas as pd
                         resultados = {
                             "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                             "sexo": st.session_state.respuestas.get("sexo", ""),
@@ -307,16 +315,15 @@ else:
                             "comentario": comentario
                         }
                         df_resultado = pd.DataFrame([resultados])
-
                         archivo = "resultados_encuesta.csv"
                         if os.path.exists(archivo):
                             df_resultado.to_csv(archivo, mode='a', header=False, index=False)
                         else:
                             df_resultado.to_csv(archivo, index=False)
-
                         st.success("¡Gracias por tu opinión!")
                         st.session_state.encuesta_hecha = True
                     except Exception as e:
                         st.error(f"Ocurrió un error al guardar la encuesta: {e}")
+
 
 
