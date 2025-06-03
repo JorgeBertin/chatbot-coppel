@@ -14,8 +14,6 @@ with st.container():
             "<span style='font-family: Montserrat, Arial, sans-serif; font-size: 1.7rem; color: #174ea6; font-weight: 700; vertical-align: middle;'>Chatbot Coppel</span>",
             unsafe_allow_html=True
         )
-
-
 # --- RESTO DE LA APP ---
 preguntas_base = [
     {"clave": "ambiente", "texto": "¿Cuál es tu ambiente favorito?", "opciones": ["Bosque", "Playa", "Ciudad"]},
