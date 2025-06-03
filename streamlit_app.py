@@ -36,6 +36,8 @@ with st.container():
             unsafe_allow_html=True
         )
 # --- RESTO DE LA APP ---
+
+
 # --- PREGUNTAS BASE ---
 preguntas_base = [
     {"clave": "ambiente", "texto": "¿Cuál es tu ambiente favorito?", "opciones": ["Bosque", "Playa", "Ciudad"]},
@@ -89,7 +91,8 @@ for autor, texto in st.session_state.history:
 
 if st.session_state.step == 0:
     pregunta_inicial = "¿La fragancia es para ti o para regalar?"
-    st.markdown(f"**Bot:** {pregunta_inicial}")
+    with st.chat_message("assistant"):
+        st.markdown(f"**Bot:** {pregunta_inicial}")
     opcion = st.radio("Selecciona:", ["Para mí", "Para regalar"], key="opt0")
     if st.button("Enviar", key="btn0"):
         add_message("bot", pregunta_inicial)
@@ -103,7 +106,8 @@ if st.session_state.step == 0:
 
 elif st.session_state.step == -1:
     pregunta_nombre = "¿Cómo se llama la persona a la que vas a regalar la fragancia?"
-    st.markdown(f"**Bot:** {pregunta_nombre}")
+    with st.chat_message("assistant"):
+        st.markdown(f"**Bot:** {pregunta_nombre}")
     nombre = st.text_input("Nombre del destinatario", key="nombre")
     if st.button("Enviar", key="btn_name") and nombre.strip():
         add_message("bot", pregunta_nombre)
@@ -115,7 +119,8 @@ elif st.session_state.step == -1:
 elif 1 <= st.session_state.step <= len(st.session_state.pregs):
     idx = st.session_state.step - 1
     preg = st.session_state.pregs[idx]
-    st.markdown(f"**Bot:** {preg['texto']}")
+    with st.chat_message("assistant"):
+        st.markdown(f"**Bot:** {preg['texto']}")
     opcion = st.radio("", preg["opciones"], key=f"opt{idx}")
     if st.button("Enviar", key=f"btn{idx}"):
         add_message("bot", preg["texto"])
