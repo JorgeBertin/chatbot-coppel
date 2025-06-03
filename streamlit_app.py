@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 import random
+import datetime
+import os
 
 st.set_page_config(page_title="Chatbot Coppel", layout="centered")
 
@@ -24,7 +26,8 @@ st.markdown("""
     }
     </style>
 """, unsafe_allow_html=True)
-# --- BANNER AMARILLO CON LOGO Y TÍTULO ---
+
+# --- BANNER CON LOGO Y TÍTULO ---
 with st.container():
     col1, col2 = st.columns([1, 4])
     with col1:
@@ -53,6 +56,89 @@ preguntas_base = [
     {"clave": "clima", "texto": "¿Qué clima prefieres?", "opciones": ["Cálido", "Frío", "Templado"]},
     {"clave": "intensidad", "texto": "¿Qué intensidad de aroma prefieres?", "opciones": ["Suave", "Moderado", "Intenso"]},
     {"clave": "momento", "texto": "¿Para qué momento la usarías?", "opciones": ["Día", "Noche", "Ambos"]},
+]
+
+# --- RESPALDO HOMBRES ---
+respaldo_hombres = [
+    {
+        "C_producto": "Perfume Versace Dreamer Eau De Toilette 100 Ml Para Hombre - Venta Internacional.",
+        "C_precio_original": 1489,
+        "C_precio_descuento": 1266
+    },
+    {
+        "C_producto": "Venta Internacional - Perfume Versace Pour Homme para Hombre Edt 100 Ml",
+        "C_precio_original": 2127,
+        "C_precio_descuento": 1872
+    },
+    {
+        "C_producto": "Venta Internacional - Perfume Carolina Herrera 212 Vip Black Para Hombre Edt 100ml",
+        "C_precio_original": 2791,
+        "C_precio_descuento": 2699
+    },
+    {
+        "C_producto": "Perfume Carolina Herrera 212 de 200 ml Edt Spray para Hombre",
+        "C_precio_original": 3499,
+        "C_precio_descuento": 2099
+    },
+    {
+        "C_producto": "Venta Internacional - Perfume Hugo Boss Boss Number One Edt 100 Ml para Hombre",
+        "C_precio_original": 1379,
+        "C_precio_descuento": 1214
+    },
+    {
+        "C_producto": "Perfume Salvatore Ferragamo Uomo Urban Feel Edt 100 Ml para Hombre - Venta Internacional",
+        "C_precio_original": 1514,
+        "C_precio_descuento": 1333
+    },
+]
+
+# --- RESPALDO MUJERES ---
+respaldo_mujeres = [
+    {
+        "C_producto": "Perfume Carolina Herrera 212 Vip Rosé 80 ml Edp Original para Dama",
+        "C_precio_original": 1848,
+        "C_precio_descuento": 2981
+    },
+    {
+        "C_producto": "Perfume Carolina Herrera Good Girl Eau de Parfum 150 ml para Mujer",
+        "C_precio_original": 2563,
+        "C_precio_descuento": 3770
+    },
+    {
+        "C_producto": "Perfume Carolina Herrera Good Girl Eau de Parfum 100 ml para Mujer",
+        "C_precio_original": 4140,
+        "C_precio_descuento": 4599
+    },
+    {
+        "C_producto": "Perfume Dior Hypnotic Poison Eau De Toilette 30 Ml Para Mujer - Venta Internacional.",
+        "C_precio_original": 1877,
+        "C_precio_descuento": 2606
+    },
+    {
+        "C_producto": "Perfume Dior Addict de Christian Dior Eau de Toilette de 100 ml para Mujer",
+        "C_precio_original": 2121,
+        "C_precio_descuento": 4079
+    },
+    {
+        "C_producto": "Perfume The Merchant Of Venice Damascus Desert Eau De Parfum 100 Ml - Venta Internacional",
+        "C_precio_original": 2301,
+        "C_precio_descuento": 2614
+    },
+    {
+        "C_producto": "Perfume Chanel Coco Mademoiselle Edp para Mujer-Venta Internacional",
+        "C_precio_original": 914,
+        "C_precio_descuento": 900
+    },
+    {
+        "C_producto": "Perfume Yves Saint Laurent Libre Eau De Toilette 90 ml para Mujer",
+        "C_precio_original": 2389,
+        "C_precio_descuento": 3109
+    },
+    {
+        "C_producto": "Perfume Yves Saint Laurent Paris Eau De Toilette 125 Ml Para Mujer - Venta Internacional",
+        "C_precio_original": 3365,
+        "C_precio_descuento": 3823
+    },
 ]
 
 def add_message(autor, texto):
@@ -126,19 +212,22 @@ else:
                     f"Ideal para momentos de **{r.get('actividad','').lower()}**.")
         add_message("bot", descripcion)
 
-        sexo_usuario = st.session_state.respuestas.get("sexo", None)
-        if sexo_usuario == "Masculino":
+        # --- CORRECCIÓN DEL RESPALDO ---
+        sexo_usuario = st.session_state.respuestas.get("sexo", "").strip().lower()
+        if sexo_usuario == "masculino":
             catalogo = st.session_state.catalogo_hombres
             tipo = "hombres"
-        elif sexo_usuario == "Femenino":
+            respaldo = respaldo_hombres
+        elif sexo_usuario == "femenino":
             catalogo = st.session_state.catalogo_mujeres
             tipo = "mujeres"
+            respaldo = respaldo_mujeres
         else:
             catalogo = None
+            respaldo = []
             tipo = ""
 
         if catalogo is not None and len(catalogo) > 0:
-            # Elegir 3 fragancias aleatorias (o menos si hay menos de 3)
             muestras = catalogo.sample(min(3, len(catalogo)))
             recomendaciones = []
             for _, rec in muestras.iterrows():
@@ -147,21 +236,80 @@ else:
                 pd = rec["C_precio_descuento"]
                 ahorro = po - pd
                 recomendaciones.append(
-    f"- **{prod}**\n"
-    f"    - Precio original: ${po:.2f}\n"
-    f"    - Precio con descuento: ${pd:.2f}\n"
-    f"    - **Ahorras: ${ahorro:.2f}**"
-)
-            texto_rec = "Con base en tus respuestas te recomendamos las siguientes fragancias:\n\n" + "\n\n".join(recomendaciones)
+                    f"- **{prod}**\n"
+                    f"    - Precio original: ${po:.2f}\n"
+                    f"    - Precio con descuento: ${pd:.2f}\n"
+                    f"    - **Ahorras: ${ahorro:.2f}**"
+                )
+            texto_rec = "Te recomendamos las siguientes fragancias:\n\n" + "\n\n".join(recomendaciones)
+            add_message("bot", texto_rec)
+        elif respaldo and len(respaldo) > 0:
+            muestras = random.sample(respaldo, min(3, len(respaldo)))
+            recomendaciones = []
+            for rec in muestras:
+                prod = rec["C_producto"]
+                po = rec["C_precio_original"]
+                pd = rec["C_precio_descuento"]
+                ahorro = po - pd
+                recomendaciones.append(
+                    f"- **{prod}**\n"
+                    f"    - Precio original: ${po:.2f}\n"
+                    f"    - Precio con descuento: ${pd:.2f}\n"
+                    f"    - **Ahorras: ${ahorro:.2f}**"
+                )
+            texto_rec = (
+                "Te recomendamos las siguientes fragancias (usando catálogo de respaldo de Coppel):\n\n" +
+                "\n\n".join(recomendaciones)
+            )
             add_message("bot", texto_rec)
         else:
             add_message("bot", f"Por favor sube el catálogo de {tipo} en la barra lateral para recomendarte.")
 
-        # Mostrar últimos mensajes (evitar repetir todo el historial)
-        for autor, texto in st.session_state.history[-6:]:
+        # Mostrar últimos mensajes del historial
+        for autor, texto in st.session_state.history[-2:]:
             if autor == "bot":
                 with st.chat_message("assistant"):
                     st.markdown(f"**Bot:** {texto}")
             elif autor == "user":
                 with st.chat_message("user"):
                     st.markdown(f"**Tú:** {texto}")
+
+        # ---- ENCUESTA DE SATISFACCIÓN ----
+        if "encuesta_hecha" not in st.session_state:
+            st.session_state.encuesta_hecha = False
+
+        if not st.session_state.encuesta_hecha:
+            with st.form("encuesta_satisfaccion"):
+                st.markdown("### 📝 Encuesta de Satisfacción")
+                satisfaccion = st.radio("¿Qué tan satisfecho(a) estás con la recomendación?", ["Muy satisfecho(a)", "Satisfecho(a)", "Poco satisfecho(a)", "Nada satisfecho(a)"])
+                comentario = st.text_area("¿Tienes algún comentario o sugerencia?")
+                enviar = st.form_submit_button("Enviar encuesta")
+
+                if enviar:
+                    try:
+                        # Guardar respuestas en un CSV
+                        import pandas as pd  # <-- Vuelve a importar pandas por si acaso
+                        resultados = {
+                            "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                            "sexo": st.session_state.respuestas.get("sexo", ""),
+                            "ambiente": st.session_state.respuestas.get("ambiente", ""),
+                            "estilo": st.session_state.respuestas.get("estilo", ""),
+                            "actividad": st.session_state.respuestas.get("actividad", ""),
+                            "clima": st.session_state.respuestas.get("clima", ""),
+                            "intensidad": st.session_state.respuestas.get("intensidad", ""),
+                            "momento": st.session_state.respuestas.get("momento", ""),
+                            "satisfaccion": satisfaccion,
+                            "comentario": comentario
+                        }
+                        df_resultado = pd.DataFrame([resultados])
+
+                        archivo = "resultados_encuesta.csv"
+                        if os.path.exists(archivo):
+                            df_resultado.to_csv(archivo, mode='a', header=False, index=False)
+                        else:
+                            df_resultado.to_csv(archivo, index=False)
+
+                        st.success("¡Gracias por tu opinión!")
+                        st.session_state.encuesta_hecha = True
+                    except Exception as e:
+                        st.error(f"Ocurrió un error al guardar la encuesta: {e}")
