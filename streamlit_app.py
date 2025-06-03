@@ -24,7 +24,8 @@ st.markdown("""
     }
     </style>
 """, unsafe_allow_html=True)
-# --- BANNER AMARILLO CON LOGO Y TÍTULO ---
+
+# --- BANNER CON LOGO Y TÍTULO ---
 with st.container():
     col1, col2 = st.columns([1, 4])
     with col1:
@@ -53,6 +54,89 @@ preguntas_base = [
     {"clave": "clima", "texto": "¿Qué clima prefieres?", "opciones": ["Cálido", "Frío", "Templado"]},
     {"clave": "intensidad", "texto": "¿Qué intensidad de aroma prefieres?", "opciones": ["Suave", "Moderado", "Intenso"]},
     {"clave": "momento", "texto": "¿Para qué momento la usarías?", "opciones": ["Día", "Noche", "Ambos"]},
+]
+
+# --- RESPALDO HOMBRES ---
+respaldo_hombres = [
+    {
+        "C_producto": "Perfume Versace Dreamer Eau De Toilette 100 Ml Para Hombre - Venta Internacional.",
+        "C_precio_original": 1489,
+        "C_precio_descuento": 1266
+    },
+    {
+        "C_producto": "Venta Internacional - Perfume Versace Pour Homme para Hombre Edt 100 Ml",
+        "C_precio_original": 2127,
+        "C_precio_descuento": 1872
+    },
+    {
+        "C_producto": "Venta Internacional - Perfume Carolina Herrera 212 Vip Black Para Hombre Edt 100ml",
+        "C_precio_original": 2791,
+        "C_precio_descuento": 2699
+    },
+    {
+        "C_producto": "Perfume Carolina Herrera 212 de 200 ml Edt Spray para Hombre",
+        "C_precio_original": 3499,
+        "C_precio_descuento": 2099
+    },
+    {
+        "C_producto": "Venta Internacional - Perfume Hugo Boss Boss Number One Edt 100 Ml para Hombre",
+        "C_precio_original": 1379,
+        "C_precio_descuento": 1214
+    },
+    {
+        "C_producto": "Perfume Salvatore Ferragamo Uomo Urban Feel Edt 100 Ml para Hombre - Venta Internacional",
+        "C_precio_original": 1514,
+        "C_precio_descuento": 1333
+    },
+]
+
+# --- RESPALDO MUJERES ---
+respaldo_mujeres = [
+    {
+        "C_producto": "Perfume Carolina Herrera 212 Vip Rosé 80 ml Edp Original para Dama",
+        "C_precio_original": 1848,
+        "C_precio_descuento": 2981
+    },
+    {
+        "C_producto": "Perfume Carolina Herrera Good Girl Eau de Parfum 150 ml para Mujer",
+        "C_precio_original": 2563,
+        "C_precio_descuento": 3770
+    },
+    {
+        "C_producto": "Perfume Carolina Herrera Good Girl Eau de Parfum 100 ml para Mujer",
+        "C_precio_original": 4140,
+        "C_precio_descuento": 4599
+    },
+    {
+        "C_producto": "Perfume Dior Hypnotic Poison Eau De Toilette 30 Ml Para Mujer - Venta Internacional.",
+        "C_precio_original": 1877,
+        "C_precio_descuento": 2606
+    },
+    {
+        "C_producto": "Perfume Dior Addict de Christian Dior Eau de Toilette de 100 ml para Mujer",
+        "C_precio_original": 2121,
+        "C_precio_descuento": 4079
+    },
+    {
+        "C_producto": "Perfume The Merchant Of Venice Damascus Desert Eau De Parfum 100 Ml - Venta Internacional",
+        "C_precio_original": 2301,
+        "C_precio_descuento": 2614
+    },
+    {
+        "C_producto": "Perfume Chanel Coco Mademoiselle Edp para Mujer-Venta Internacional",
+        "C_precio_original": 914,
+        "C_precio_descuento": 900
+    },
+    {
+        "C_producto": "Perfume Yves Saint Laurent Libre Eau De Toilette 90 ml para Mujer",
+        "C_precio_original": 2389,
+        "C_precio_descuento": 3109
+    },
+    {
+        "C_producto": "Perfume Yves Saint Laurent Paris Eau De Toilette 125 Ml Para Mujer - Venta Internacional",
+        "C_precio_original": 3365,
+        "C_precio_descuento": 3823
+    },
 ]
 
 def add_message(autor, texto):
@@ -138,7 +222,6 @@ else:
             tipo = ""
 
         if catalogo is not None and len(catalogo) > 0:
-            # Elegir 3 fragancias aleatorias (o menos si hay menos de 3)
             muestras = catalogo.sample(min(3, len(catalogo)))
             recomendaciones = []
             for _, rec in muestras.iterrows():
@@ -147,12 +230,44 @@ else:
                 pd = rec["C_precio_descuento"]
                 ahorro = po - pd
                 recomendaciones.append(
-    f"- **{prod}**\n"
-    f"    - Precio original: ${po:.2f}\n"
-    f"    - Precio con descuento: ${pd:.2f}\n"
-    f"    - **Ahorras: ${ahorro:.2f}**"
-)
-            texto_rec = "Con base en tus respuestas te recomendamos las siguientes fragancias:\n\n" + "\n\n".join(recomendaciones)
+                    f"- **{prod}**\n"
+                    f"    - Precio original: ${po:.2f}\n"
+                    f"    - Precio con descuento: ${pd:.2f}\n"
+                    f"    - **Ahorras: ${ahorro:.2f}**"
+                )
+            texto_rec = "Te recomendamos las siguientes fragancias:\n\n" + "\n\n".join(recomendaciones)
+            add_message("bot", texto_rec)
+        elif tipo == "hombres":
+            muestras = random.sample(respaldo_hombres, min(3, len(respaldo_hombres)))
+            recomendaciones = []
+            for rec in muestras:
+                prod = rec["C_producto"]
+                po = rec["C_precio_original"]
+                pd = rec["C_precio_descuento"]
+                ahorro = po - pd
+                recomendaciones.append(
+                    f"- **{prod}**\n"
+                    f"    - Precio original: ${po:.2f}\n"
+                    f"    - Precio con descuento: ${pd:.2f}\n"
+                    f"    - **Ahorras: ${ahorro:.2f}**"
+                )
+            texto_rec = "Te recomendamos las siguientes fragancias:\n\n" + "\n\n".join(recomendaciones)
+            add_message("bot", texto_rec)
+        elif tipo == "mujeres":
+            muestras = random.sample(respaldo_mujeres, min(3, len(respaldo_mujeres)))
+            recomendaciones = []
+            for rec in muestras:
+                prod = rec["C_producto"]
+                po = rec["C_precio_original"]
+                pd = rec["C_precio_descuento"]
+                ahorro = po - pd
+                recomendaciones.append(
+                    f"- **{prod}**\n"
+                    f"    - Precio original: ${po:.2f}\n"
+                    f"    - Precio con descuento: ${pd:.2f}\n"
+                    f"    - **Ahorras: ${ahorro:.2f}**"
+                )
+            texto_rec = "Te recomendamos las siguientes fragancias:\n\n" + "\n\n".join(recomendaciones)
             add_message("bot", texto_rec)
         else:
             add_message("bot", f"Por favor sube el catálogo de {tipo} en la barra lateral para recomendarte.")
