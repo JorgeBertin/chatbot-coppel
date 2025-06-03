@@ -39,6 +39,11 @@ with st.container():
 # --- PREGUNTAS BASE ---
 preguntas_base = [
     {
+        "clave": "inicio",
+        "texto": "Hola, soy el nuevo chatbot de fragancias de Coppel. ¿Estás listo para empezar con el test?",
+        "opciones": ["Sí", "No"]
+    },
+    {
         "clave": "sexo",
         "texto": "¿Cuál es tu sexo?  \n*Si es para regalo, trata de contestar como esa persona.*",
         "opciones": ["Masculino", "Femenino"]
