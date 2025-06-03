@@ -147,8 +147,11 @@ else:
                 pd = rec["C_precio_descuento"]
                 ahorro = po - pd
                 recomendaciones.append(
-                    f"- **{prod}**\n    - Precio original: ${po:.2f}\n    - Precio con descuento: ${pd:.2f} (ahorras ${ahorro:.2f})"
-                )
+    f"- **{prod}**\n"
+    f"    - Precio original: ${po:.2f}\n"
+    f"    - Precio con descuento: ${pd:.2f}\n"
+    f"    - **Ahorras: ${ahorro:.2f}**"
+)
             texto_rec = "Te recomendamos las siguientes fragancias:\n\n" + "\n\n".join(recomendaciones)
             add_message("bot", texto_rec)
         else:
