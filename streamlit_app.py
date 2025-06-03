@@ -289,41 +289,55 @@ else:
                     st.markdown(f"**Tú:** {texto}")
 
         # ---- ENCUESTA DE SATISFACCIÓN ----
-        if "encuesta_hecha" not in st.session_state:
-            st.session_state.encuesta_hecha = False
 
-        if not st.session_state.encuesta_hecha:
-            with st.form("encuesta_satisfaccion"):
-                st.markdown("### 📝 Encuesta de Satisfacción")
-                satisfaccion = st.radio("¿Qué tan satisfecho(a) estás con la recomendación?", ["Muy satisfecho(a)", "Satisfecho(a)", "Poco satisfecho(a)", "Nada satisfecho(a)"])
-                comentario = st.text_area("¿Tienes algún comentario o sugerencia?")
-                enviar = st.form_submit_button("Enviar encuesta")
+if "encuesta_hecha" not in st.session_state:
+    st.session_state.encuesta_hecha = False
+if "respuestas_encuesta" not in st.session_state:
+    st.session_state.respuestas_encuesta = {}
 
-                if enviar:
-                    try:
-                        import pandas as pd
-                        resultados = {
-                            "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                            "sexo": st.session_state.respuestas.get("sexo", ""),
-                            "ambiente": st.session_state.respuestas.get("ambiente", ""),
-                            "estilo": st.session_state.respuestas.get("estilo", ""),
-                            "actividad": st.session_state.respuestas.get("actividad", ""),
-                            "clima": st.session_state.respuestas.get("clima", ""),
-                            "intensidad": st.session_state.respuestas.get("intensidad", ""),
-                            "momento": st.session_state.respuestas.get("momento", ""),
-                            "satisfaccion": satisfaccion,
-                            "comentario": comentario
-                        }
-                        df_resultado = pd.DataFrame([resultados])
-                        archivo = "resultados_encuesta.csv"
-                        if os.path.exists(archivo):
-                            df_resultado.to_csv(archivo, mode='a', header=False, index=False)
-                        else:
-                            df_resultado.to_csv(archivo, index=False)
-                        st.success("¡Gracias por tu opinión!")
-                        st.session_state.encuesta_hecha = True
-                    except Exception as e:
-                        st.error(f"Ocurrió un error al guardar la encuesta: {e}")
+if not st.session_state.encuesta_hecha:
+    with st.form("encuesta_satisfaccion"):
+        st.markdown("### 📝 Encuesta de Satisfacción")
+        respuestas_encuesta = {}
+        for preg in encuesta_base:
+            if preg["opciones"]:
+                # Radio para selección múltiple
+                opcion = st.radio(
+                    preg["texto"], preg["opciones"],
+                    key=f"encuesta_{preg['clave']}"
+                )
+                respuestas_encuesta[preg["clave"]] = opcion
+            else:
+                # Text area para comentarios
+                comentario = st.text_area(
+                    preg["texto"], key=f"encuesta_{preg['clave']}"
+                )
+                respuestas_encuesta[preg["clave"]] = comentario
 
+        enviar = st.form_submit_button("Enviar encuesta")
 
-
+        if enviar:
+            try:
+                import pandas as pd
+                resultados = {
+                    "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    "sexo": st.session_state.respuestas.get("sexo", ""),
+                    "ambiente": st.session_state.respuestas.get("ambiente", ""),
+                    "estilo": st.session_state.respuestas.get("estilo", ""),
+                    "actividad": st.session_state.respuestas.get("actividad", ""),
+                    "clima": st.session_state.respuestas.get("clima", ""),
+                    "intensidad": st.session_state.respuestas.get("intensidad", ""),
+                    "momento": st.session_state.respuestas.get("momento", ""),
+                    "satisfaccion": respuestas_encuesta.get("satisfaccion", ""),
+                    "comentario": respuestas_encuesta.get("comentario", "")
+                }
+                df_resultado = pd.DataFrame([resultados])
+                archivo = "resultados_encuesta.csv"
+                if os.path.exists(archivo):
+                    df_resultado.to_csv(archivo, mode='a', header=False, index=False)
+                else:
+                    df_resultado.to_csv(archivo, index=False)
+                st.success("¡Gracias por tu opinión!")
+                st.session_state.encuesta_hecha = True
+            except Exception as e:
+                st.error(f"Ocurrió un error al guardar la encuesta: {e}")
