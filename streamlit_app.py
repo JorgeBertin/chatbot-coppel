@@ -36,7 +36,7 @@ with st.container():
             unsafe_allow_html=True
         )
 # --- RESTO DE LA APP ---
-# --- RESTO DEL CÓDIGO IGUAL ---
+# --- PREGUNTAS BASE ---
 preguntas_base = [
     {"clave": "ambiente", "texto": "¿Cuál es tu ambiente favorito?", "opciones": ["Bosque", "Playa", "Ciudad"]},
     {"clave": "estilo", "texto": "¿Qué estilo te define mejor?", "opciones": ["Elegante", "Deportivo", "Romántico"]},
@@ -78,13 +78,13 @@ uploaded = st.sidebar.file_uploader("Sube el catálogo (Excel .xlsx)", type=["xl
 if uploaded:
     st.session_state.catalogo = pd.read_excel(uploaded)
 
-# Mostrar historial chat, personalizando los iconos/textos:
+# Mostrar historial chat SIN avatar, solo "Bot:" y "Tú:"
 for autor, texto in st.session_state.history:
     if autor == "bot":
-        with st.chat_message("assistant", avatar="C"):
-            st.markdown(f"**Coppel:** {texto}")
+        with st.chat_message("assistant"):
+            st.markdown(f"**Bot:** {texto}")
     elif autor == "user":
-        with st.chat_message("user", avatar="🧑"):
+        with st.chat_message("user"):
             st.markdown(f"**Tú:** {texto}")
 
 if st.session_state.step == 0:
@@ -148,11 +148,8 @@ else:
     # Mostrar últimos mensajes (evitar repetir todo el historial)
     for autor, texto in st.session_state.history[-4:]:
         if autor == "bot":
-            with st.chat_message("assistant", avatar="C"):
+            with st.chat_message("assistant"):
                 st.markdown(f"**Bot:** {texto}")
         elif autor == "user":
-            with st.chat_message("user", avatar="T"):
+            with st.chat_message("user"):
                 st.markdown(f"**Tú:** {texto}")
-
-
-
