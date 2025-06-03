@@ -1,14 +1,12 @@
 import streamlit as st
 import pandas as pd
 import random
-import time
 
 st.set_page_config(page_title="Chatbot Coppel", layout="centered")
 
 # --- CSS para compactar los mensajes de chat ---
 st.markdown("""
     <style>
-    /* Solo compacta las burbujas de chat */
     div[data-testid="stChatMessage"] {
         padding: 8px 16px !important;
         margin-bottom: 2px !important;
@@ -26,17 +24,18 @@ st.markdown("""
     }
     </style>
 """, unsafe_allow_html=True)
+
 # --- BANNER AMARILLO CON LOGO Y TÍTULO ---
 with st.container():
     col1, col2 = st.columns([1, 4])
     with col1:
-        st.image("coppel_logo4.png")  # Ajusta el width si lo quieres más pequeño
+        st.image("coppel_logo4.png")
     with col2:
         st.markdown(
             "<span style='font-family: Montserrat, Arial, sans-serif; font-size: 1.7rem; color: #174ea6; font-weight: 700; vertical-align: middle;'>Chatbot Coppel</span>",
             unsafe_allow_html=True
         )
-# --- RESTO DE LA APP ---
+
 # --- PREGUNTAS BASE ---
 preguntas_base = [
     {"clave": "sexo", "texto": "¿Cuál es tu sexo?", "opciones": ["Masculino", "Femenino"]},
@@ -72,13 +71,20 @@ if "pregs" not in st.session_state:
     st.session_state.pregs = []
 if "nombre" not in st.session_state:
     st.session_state.nombre = "ti"
-if "catalogo" not in st.session_state:
-    st.session_state.catalogo = None
+# Nuevos para hombre y mujer
+if "catalogo_hombres" not in st.session_state:
+    st.session_state.catalogo_hombres = None
+if "catalogo_mujeres" not in st.session_state:
+    st.session_state.catalogo_mujeres = None
 
-# Subir catálogo
-uploaded = st.sidebar.file_uploader("Sube el catálogo (Excel .xlsx)", type=["xlsx"])
-if uploaded:
-    st.session_state.catalogo = pd.read_excel(uploaded)
+# Subir catálogos por sexo
+uploaded_hombres = st.sidebar.file_uploader("Sube el catálogo de HOMBRES (Excel .xlsx)", type=["xlsx"], key="hombres")
+uploaded_mujeres = st.sidebar.file_uploader("Sube el catálogo de MUJERES (Excel .xlsx)", type=["xlsx"], key="mujeres")
+
+if uploaded_hombres:
+    st.session_state.catalogo_hombres = pd.read_excel(uploaded_hombres)
+if uploaded_mujeres:
+    st.session_state.catalogo_mujeres = pd.read_excel(uploaded_mujeres)
 
 # Mostrar historial chat SIN avatar, solo "Bot:" y "Tú:"
 for autor, texto in st.session_state.history:
@@ -137,8 +143,19 @@ else:
                    f"Ideal para momentos de **{r['actividad'].lower()}**.")
     add_message("bot", descripcion)
 
-    if st.session_state.catalogo is not None:
-        rec = st.session_state.catalogo.sample(1).iloc[0]
+    sexo_usuario = st.session_state.respuestas.get("sexo", None)
+    if sexo_usuario == "Masculino":
+        catalogo = st.session_state.catalogo_hombres
+        tipo = "hombres"
+    elif sexo_usuario == "Femenino":
+        catalogo = st.session_state.catalogo_mujeres
+        tipo = "mujeres"
+    else:
+        catalogo = None
+        tipo = ""
+
+    if catalogo is not None and len(catalogo) > 0:
+        rec = catalogo.sample(1).iloc[0]
         prod = rec["C_producto"]
         po = rec["C_precio_original"]
         pd = rec["C_precio_descuento"]
@@ -148,7 +165,7 @@ else:
                      f"- Precio con descuento: ${pd:.2f} (ahorras ${ahorro:.2f})")
         add_message("bot", texto_rec)
     else:
-        add_message("bot", "Por favor sube el catálogo en la barra lateral para recomendarte.")
+        add_message("bot", f"Por favor sube el catálogo de {tipo} en la barra lateral para recomendarte.")
 
     # Mostrar últimos mensajes (evitar repetir todo el historial)
     for autor, texto in st.session_state.history[-4:]:
