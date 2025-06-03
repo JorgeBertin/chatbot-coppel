@@ -277,8 +277,14 @@ else:
                 with st.chat_message("user"):
                     st.markdown(f"**Tú:** {texto}")
 
-        # AUTOSCROLL marcador después del historial
+        # AQUÍ VA el bloque de autoscroll
         st.markdown('<div id="chat_end"></div>', unsafe_allow_html=True)
+        st.markdown("""
+            <script>
+            var chatEnd = document.getElementById('chat_end');
+            if (chatEnd) { chatEnd.scrollIntoView({ behavior: 'smooth' }); }
+    </script>
+""", unsafe_allow_html=True)
 
 # --- AUTOSCROLL AL FINAL DEL CHAT ---
 st.markdown("""
