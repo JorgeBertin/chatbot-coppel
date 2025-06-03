@@ -227,10 +227,10 @@ if "catalogo_mujeres" not in st.session_state:
 #uploaded_hombres = st.sidebar.file_uploader("Sube el catálogo de HOMBRES (Excel .xlsx)", type=["xlsx"], key="hombres")
 #uploaded_mujeres = st.sidebar.file_uploader("Sube el catálogo de MUJERES (Excel .xlsx)", type=["xlsx"], key="mujeres")
 
-if uploaded_hombres:
-    st.session_state.catalogo_hombres = pd.read_excel(uploaded_hombres)
-if uploaded_mujeres:
-    st.session_state.catalogo_mujeres = pd.read_excel(uploaded_mujeres)
+#if uploaded_hombres:
+    #st.session_state.catalogo_hombres = pd.read_excel(uploaded_hombres)
+#if uploaded_mujeres:
+    #st.session_state.catalogo_mujeres = pd.read_excel(uploaded_mujeres)
 
 # Mostrar historial chat SIN avatar, solo "Bot:" y "Tú:"
 for autor, texto in st.session_state.history:
@@ -276,11 +276,11 @@ else:
         # --- CORRECCIÓN DEL RESPALDO ---
         sexo_usuario = st.session_state.respuestas.get("sexo", "").strip().lower()
         if sexo_usuario == "masculino":
-            catalogo = st.session_state.catalogo_hombres
+            #catalogo = st.session_state.catalogo_hombres
             tipo = "hombres"
             respaldo = respaldo_hombres
         elif sexo_usuario == "femenino":
-            catalogo = st.session_state.catalogo_mujeres
+            #catalogo = st.session_state.catalogo_mujeres
             tipo = "mujeres"
             respaldo = respaldo_mujeres
         else:
