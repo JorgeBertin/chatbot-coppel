@@ -304,13 +304,4 @@ else:
                     except Exception as e:
                         st.error(f"Ocurrió un error al guardar la encuesta: {e}")
 
-        # Mostrar últimos mensajes (evitar repetir todo el historial)
-        for autor, texto in st.session_state.history[1:]:
-            if autor == "bot":
-                with st.chat_message("assistant"):
-                    st.markdown(f"**Bot:** {texto}")
-            elif autor == "user":
-                with st.chat_message("user"):
-                    st.markdown(f"**Tú:** {texto}")
-
 
