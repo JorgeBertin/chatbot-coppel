@@ -6,7 +6,7 @@ import os
 
 st.set_page_config(page_title="Chatbot Coppel", layout="centered")
 
-# --- CSS para compactar los mensajes de chat ---
+# --- CSS para compactar mensajes y hacer sticky el banner ---
 st.markdown("""
     <style>
     div[data-testid="stChatMessage"] {
@@ -22,21 +22,47 @@ st.markdown("""
         margin-left: 0 !important;
     }
     .block-container {
-        padding-top: 35px !important;
+        padding-top: 75px !important; /* Deja espacio para el banner sticky */
+    }
+    /* Sticky banner */
+    .sticky-banner-coppel {
+        position: sticky;
+        top: 0;
+        z-index: 999;
+        background: #fff;
+        border-bottom: 1px solid #e7e7e7;
+        padding: 10px 0 10px 0;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        width: 100%;
+        box-shadow: 0 2px 6px -2px rgba(0,0,0,0.04);
+    }
+    .sticky-banner-coppel img {
+        height: 48px;
+        margin-left: 15px;
+    }
+    .sticky-banner-coppel-title {
+        font-family: Montserrat, Arial, sans-serif;
+        font-size: 1.7rem;
+        color: #174ea6;
+        font-weight: 700;
+        margin: 0;
     }
     </style>
 """, unsafe_allow_html=True)
 
-# --- BANNER CON LOGO Y TÍTULO ---
-with st.container():
-    col1, col2 = st.columns([1, 4])
-    with col1:
-        st.image("coppel_logo4.png")
-    with col2:
-        st.markdown(
-            "<span style='font-family: Montserrat, Arial, sans-serif; font-size: 1.7rem; color: #174ea6; font-weight: 700; vertical-align: middle;'>Chatbot Coppel</span>",
-            unsafe_allow_html=True
-        )
+# --- BANNER LOGO + TÍTULO EN STICKY ---
+st.markdown("""
+<div class="sticky-banner-coppel">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/3/38/Logo_Coppel.png" alt="Coppel Logo">
+    <span class="sticky-banner-coppel-title">Chatbot Coppel</span>
+</div>
+""", unsafe_allow_html=True)
+
+
+
+
 
 # --- PREGUNTAS BASE ---
 preguntas_base = [
