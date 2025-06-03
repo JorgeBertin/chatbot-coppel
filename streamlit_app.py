@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import random
-import time
 
 st.set_page_config(page_title="Chatbot Coppel", layout="centered")
 
@@ -41,7 +40,7 @@ preguntas_base = [
     {
         "clave": "inicio",
         "texto": "Hola, soy el nuevo chatbot de fragancias de Coppel. ¿Estás listo para empezar con el test?",
-        "opciones": ["Sí", "Obvioo"]
+        "opciones": ["Sí", "No"]
     },
     {
         "clave": "sexo",
@@ -65,7 +64,7 @@ def add_message(autor, texto):
 if "history" not in st.session_state:
     st.session_state.history = []
 if "step" not in st.session_state:
-    st.session_state.step = 1  # ← Arranca en 1, ya no hay paso 0
+    st.session_state.step = 1  # Ahora inicia con la primera pregunta
 if "respuestas" not in st.session_state:
     st.session_state.respuestas = {}
 if "pregs" not in st.session_state:
@@ -106,47 +105,62 @@ if 1 <= st.session_state.step <= len(st.session_state.pregs):
         add_message("bot", preg["texto"])
         add_message("user", opcion)
         st.session_state.respuestas[preg["clave"]] = opcion
-        st.session_state.step += 1
+
+        # Si responde "No" en la bienvenida, termina el flujo con un mensaje de despedida
+        if preg["clave"] == "inicio" and opcion == "No":
+            add_message("bot", "¡No hay problema! Cuando quieras, vuelve a iniciar el test. 😊")
+            st.session_state.step = len(st.session_state.pregs) + 1  # Salta al final
+        else:
+            st.session_state.step += 1
 
 else:
     nombre = st.session_state.nombre
     r = st.session_state.respuestas
-    sujeto = "eres" if nombre == "ti" else f"{nombre} es"
-    descripcion = (f"¡Gracias! Según tus respuestas, {sujeto} alguien que disfruta del ambiente **{r['ambiente'].lower()}**, "
-                   f"con un estilo **{r['estilo'].lower()}**, y prefiere fragancias de intensidad **{r['intensidad'].lower()}**. "
-                   f"Ideal para momentos de **{r['actividad'].lower()}**.")
-    add_message("bot", descripcion)
-
-    sexo_usuario = st.session_state.respuestas.get("sexo", None)
-    if sexo_usuario == "Masculino":
-        catalogo = st.session_state.catalogo_hombres
-        tipo = "hombres"
-    elif sexo_usuario == "Femenino":
-        catalogo = st.session_state.catalogo_mujeres
-        tipo = "mujeres"
+    if r.get("inicio") == "No":
+        # Ya se mostró el mensaje de despedida, no hacer más.
+        pass
     else:
-        catalogo = None
-        tipo = ""
+        sujeto = "eres" if nombre == "ti" else f"{nombre} es"
+        descripcion = (f"¡Gracias! Según tus respuestas, {sujeto} alguien que disfruta del ambiente **{r.get('ambiente','').lower()}**, "
+                    f"con un estilo **{r.get('estilo','').lower()}**, y prefiere fragancias de intensidad **{r.get('intensidad','').lower()}**. "
+                    f"Ideal para momentos de **{r.get('actividad','').lower()}**.")
+        add_message("bot", descripcion)
 
-    if catalogo is not None and len(catalogo) > 0:
-        rec = catalogo.sample(1).iloc[0]
-        prod = rec["C_producto"]
-        po = rec["C_precio_original"]
-        pd = rec["C_precio_descuento"]
-        ahorro = po - pd
-        texto_rec = (f"Te recomendamos **{prod}**\n\n"
-                     f"- Precio original: ${po:.2f}\n"
-                     f"- Precio con descuento: ${pd:.2f} (ahorras ${ahorro:.2f})")
-        add_message("bot", texto_rec)
-    else:
-        add_message("bot", f"Por favor sube el catálogo de {tipo} en la barra lateral para recomendarte.")
+        sexo_usuario = st.session_state.respuestas.get("sexo", None)
+        if sexo_usuario == "Masculino":
+            catalogo = st.session_state.catalogo_hombres
+            tipo = "hombres"
+        elif sexo_usuario == "Femenino":
+            catalogo = st.session_state.catalogo_mujeres
+            tipo = "mujeres"
+        else:
+            catalogo = None
+            tipo = ""
 
-    # Mostrar últimos mensajes (evitar repetir todo el historial)
-    for autor, texto in st.session_state.history[-4:]:
-        if autor == "bot":
-            with st.chat_message("assistant"):
-                st.markdown(f"**Bot:** {texto}")
-        elif autor == "user":
-            with st.chat_message("user"):
-                st.markdown(f"**Tú:** {texto}")
+        if catalogo is not None and len(catalogo) > 0:
+            # Elegir 3 fragancias aleatorias (o menos si hay menos de 3)
+            muestras = catalogo.sample(min(3, len(catalogo)))
+            recomendaciones = []
+            for _, rec in muestras.iterrows():
+                prod = rec["C_producto"]
+                po = rec["C_precio_original"]
+                pd = rec["C_precio_descuento"]
+                ahorro = po - pd
+                recomendaciones.append(
+                    f"- **{prod}**\n    - Precio original: ${po:.2f}\n    - Precio con descuento: ${pd:.2f} (ahorras ${ahorro:.2f})"
+                )
+            texto_rec = "Te recomendamos las siguientes fragancias:\n\n" + "\n\n".join(recomendaciones)
+            add_message("bot", texto_rec)
+        else:
+            add_message("bot", f"Por favor sube el catálogo de {tipo} en la barra lateral para recomendarte.")
+
+        # Mostrar últimos mensajes (evitar repetir todo el historial)
+        for autor, texto in st.session_state.history[-6:]:
+            if autor == "bot":
+                with st.chat_message("assistant"):
+                    st.markdown(f"**Bot:** {texto}")
+            elif autor == "user":
+                with st.chat_message("user"):
+                    st.markdown(f"**Tú:** {texto}")
+
 
