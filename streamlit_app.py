@@ -42,7 +42,7 @@ with st.container():
 preguntas_base = [
     {
         "clave": "inicio",
-        "texto": "Hola, soy el nuevo chatbot de fragancias de Coppel. ¿Estás listo para empezar con el test? \n*Para pasar a la siguiente pregunta haz doble click en enviar.* ",
+        "texto": "Hola, soy el nuevo chatbot de fragancias de Coppel. ¿Todo listo para empezar con el test? \n \n *Para pasar a la siguiente pregunta haz doble click en enviar.* ",
         "opciones": ["Sí", "No"]
     },
     {
